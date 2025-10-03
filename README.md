@@ -12,10 +12,7 @@
 - [Descripción del Proyecto](#-descripción-del-proyecto)
 - [Problema que Resuelve](#-problema-que-resuelve)
 - [Público Objetivo](#-público-objetivo)
-- [Propuesta de Valor](#-propuesta-de-valor)
 - [Arquitectura Cloud](#️-arquitectura-cloud)
-- [Funcionalidades MVP](#-funcionalidades-mvp)
-- [Roadmap del Proyecto](#-roadmap-del-proyecto)
 - [Documentación de Hitos](#-documentación-de-hitos)
 - [Tecnologías](#-tecnologías)
 - [Autor](#-autor)
@@ -46,10 +43,10 @@ Actualmente, cuando se visita cualquier ciudad o pueblo, los sitios para ver o l
 
 ### **Solución: CultureMap**
 
-✅ **Un solo mapa** para descubrir toda la oferta cultural local  (Se centrará en Granada)
-✅ **Comunidad activa** que propone y valida contenidos  
-✅ **Dar visibilidad** a organizaciones pequeñas  
-✅ **Descubrimiento auténtico** de la ciudad 
+- ✅ **Un solo mapa** para descubrir toda la oferta cultural local  (Se centrará en Granada)
+- ✅ **Comunidad activa** que propone y valida contenidos  
+- ✅ **Dar visibilidad** a organizaciones pequeñas  
+- ✅ **Descubrimiento auténtico** de la ciudad 
 
 ---
 
@@ -80,9 +77,9 @@ Actualmente, cuando se visita cualquier ciudad o pueblo, los sitios para ver o l
 
 CultureMap se beneficia de manera **importante** del despliegue en la nube:
   
-✅ **Multiusuario**: Permite que distintos usuario con distintos roles incluyan sitios o eventos variados
-✅ **Alta disponibilidad**: Acceso 24/7 desde cualquier dispositivo  
-✅ **Almacenamiento distribuido**: Muchas imagenes de sitios y eventos     
+- ✅ **Multiusuario**: Permite que distintos usuario con distintos roles incluyan sitios o eventos variados
+- ✅ **Alta disponibilidad**: Acceso 24/7 desde cualquier dispositivo  
+- ✅ **Almacenamiento distribuido**: Muchas imagenes de sitios y eventos     
 
 ## 📚 Documentación de Hitos
 
@@ -102,7 +99,7 @@ CultureMap se beneficia de manera **importante** del despliegue en la nube:
 
 ## 👤 Autor
 
-**[Teodosio DOnaire González]**  
+**[Teodosio Donaire González]**  
 Estudiante de Máster en Ingeniería Informática  
 Universidad de Granada
 
