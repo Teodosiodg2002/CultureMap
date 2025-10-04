@@ -16,7 +16,7 @@ Este primer hito tiene como objetivo:
 
 ## 📦 Estructura del Repositorio
 
-El repositorio sigue una estructura profesional y organizada:
+El repositorio sigue la siguiente estructura:
 
 ```bash  
 CultureMap/
@@ -104,7 +104,7 @@ Una plataforma web colaborativa que:
 CultureMap **necesita la nube** por las siguientes razones:
 
 ### **1. Naturaleza Multiusuario y Colaborativa**
-- Múltiples usuarios crean contenido simultáneamente
+- Múltiples usuarios añden contenido simultáneamente
 - Sincronización en tiempo real del mapa
 - Gestión de permisos y roles
 
@@ -126,10 +126,10 @@ CultureMap **necesita la nube** por las siguientes razones:
 
 ## 📊 Lógica de Negocio
 
-CultureMap **no es un simple CRUD**. Incluye lógica de negocio compleja:
+CultureMap **no es un simple CRUD**. Incluye la siguiente lógica de negocio:
 
 ### **1. Moderación y Calidad de Contenido**
-- **Flujo de aprobación**: cada propuesta (evento o sitio) pasa de Pendiente a Aprobado/Rechazado por parte de moderadores u organizadores.
+- **Aprobación**: cada propuesta (evento o sitio) pasa de Pendiente a Aprobado/Rechazado por parte de moderadores u organizadores.
 - **Priorización de contenidos**: Sitios con más votos aparecen primero
 - **Detección de duplicados**: Evitar que se propongan sitios repetidos
 - **Sistema de reportes**: Usuarios pueden reportar contenido inapropiado
@@ -265,7 +265,7 @@ Incluyen:
 - [✅] README.md completo con descripción del problema
 - [✅] LICENSE (MIT) añadida
 - [✅] .gitignore configurado
-- [✅] Estructura de carpetas profesional (`docs/`, `docs/hitos/`, etc.)
+- [✅] Estructura de carpetas (`docs/`, `docs/hitos/`, etc.)
 - [✅] Git configurado localmente (nombre, email)
 - [✅] Claves SSH generadas y añadidas a GitHub
 - [✅] Perfil de GitHub completado (foto, bio, ubicación)
@@ -273,7 +273,7 @@ Incluyen:
 - [✅] Documentación de configuración del entorno
 - [✅] User Stories definidas y documentadas
 - [✅] Issues creados y asignados a Milestones
-- [✅] Commits descriptivos y bien formateados
+- [✅] Commits descriptivos
 - [✅] Justificación clara del despliegue en la nube
 - [✅] Lógica de negocio explicada (más allá de CRUD)
 
