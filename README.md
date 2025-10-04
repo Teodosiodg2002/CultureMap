@@ -89,11 +89,7 @@ CultureMap se beneficia de manera **importante** del despliegue en la nube:
 
 ## 🛠️ Tecnologías
 
-### **Frontend**
-- React
-
-### **Backend**
-- Python
+****(En proceso)***
 
 ---
 
