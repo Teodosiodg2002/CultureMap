@@ -139,7 +139,7 @@ CultureMap **no es un simple CRUD**. Incluye lógica de negocio compleja:
 - **Recordatorios**: Notificaciones X días antes del evento
 - **Eventos recurrentes**: soporte para actividades que se repiten de forma periódica (ej. “Todos los jueves, mercadillo cultural”).
 
-### **3. Gamificación**
+### **3. Sistema de puntos**
 - **Sistemas de reputación**: los usuarios que más contribuyen con propuestas aprobadas ganan puntos de reputación.
 - **Logros y badges**: reconocimiento simbólico (“Explorador local”, “Cazador de eventos”).
 - **Ranking de usuarios activos**: refuerza la motivación y la sensación de comunidad.
@@ -177,23 +177,21 @@ Las historias de usuario están organizadas por **Épicas** (grupos funcionales)
 
 **US-09**: Como usuario, quiero comentar en un sitio para compartir mi experiencia
 
-**US-10**: Como usuario, quiero comentar en un sitio para compartir mi experiencia con la comunidad.
-
 ---
 
 ### **Épica 4: Eventos Temporales** (Fase 2)
 
-**US-11**: Como organizador, quiero publicar un evento cultural para darle visibilidad
+**US-10**: Como organizador, quiero publicar un evento cultural para darle visibilidad
 
-**US-12**: Como usuario, quiero ver eventos próximos en el mapa para planificar mi agenda
+**US-11**: Como usuario, quiero ver eventos próximos en el mapa para planificar mi agenda
 
-**US-13**: Como usuario, quiero recibir notificaciones de eventos cerca de mis sitios favoritos
+**US-12**: Como usuario, quiero recibir notificaciones de eventos cerca de mis sitios favoritos
 
 ---
 
 ### **Épica 5: Búsqueda y Descubrimiento**
 
-**US-14**: Como usuario, quiero buscar sitios por nombre o categoría para localizarlos fácilmente.
+**US-13**: Como usuario, quiero buscar sitios por nombre o categoría para localizarlos fácilmente.
 
 ---
 
