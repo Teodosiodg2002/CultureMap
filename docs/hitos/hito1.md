@@ -18,25 +18,24 @@ Este primer hito tiene como objetivo:
 
 El repositorio sigue una estructura profesional y organizada:
 
+```bash  
 CultureMap/
-├── .gitignore              # Archivos ignorados por Git
-├── LICENSE                 # Licencia MIT del proyecto
-├── README.md               # Documentación principal del proyecto
-└── docs/                   # Documentación adicional
+├── .gitignore                # Archivos ignorados por Git
+├── LICENSE                   # Licencia MIT del proyecto
+├── README.md                 # Documentación principal del proyecto
+└── docs/                     # Documentación adicional
 ├── hitos/
-│   └── hito1.md       # Este documento
-├── images/            # Capturas de pantalla y diagramas
-├── arquitectura/      # Documentación técnica de arquitectura
-│   └── diagrama_arquitectura.md
+│   └── hito1.md              # (Este documento)
+├── images/...                # Capturas de pantalla y diagramas
 └── configuracion_entorno.md  # Guía de configuración
-
+```
 ---
 
 ## 🔧 Configuración del Entorno
 
 ### **Git y GitHub**
 
-Se ha configurado correctamente el entorno de desarrollo:
+Se ha configurado el entorno de desarrollo:
 
 ✅ **Git configurado localmente**
 - Nombre de usuario configurado
@@ -62,9 +61,9 @@ Se ha configurado correctamente el entorno de desarrollo:
 
 ### **Problema Identificado**
 
-Los sitios a visitar en Granada (y en general) son siempre los mismos, y para encontrar nuevos, es necesario buscar entre muchas páginas  
+❌ **Los sitios a visitar en Granada (y en general) son siempre los mismos**, y para encontrar nuevos, es necesario buscar entre muchas páginas  
 
-❌ **Eventos pequeños e invisibles**: Conciertos en bares, exposiciones en galerías pequeñas, charlas en espacios culturales no aparecen en plataformas grandes
+❌ **Eventos pequeños y con poca participación**: Conciertos en bares, exposiciones en galerías pequeñas, charlas en espacios culturales no aparecen en plataformas grandes
 
 ❌ **Sitios auténticos ocultos**: Miradores únicos, bares con encanto, tiendas locales, arte urbano... no están bien documentados
 
@@ -109,16 +108,16 @@ CultureMap **necesita la nube** por las siguientes razones:
 - Sincronización en tiempo real del mapa
 - Gestión de permisos y roles
 
-### **1. Alta Disponibilidad y Accesibilidad**
+### **2. Alta Disponibilidad y Accesibilidad**
 - Acceso 24/7 desde web y móvil
 - Usuarios acceden desde diferentes ubicaciones
 - No puede caerse durante eventos importantes
 - **Necesita**: Load Balancer, Multi-AZ deployment
 
-### **1. Escalabilidad según Demanda**
+### **3. Escalabilidad según Demanda**
 - Crecimiento progresivo de usuarios
 
-### **1. Backup y Recuperación**
+### **4. Backup y Recuperación**
 - Datos comunitarios valiosos (contenido generado por usuarios)
 - Necesidad de backups automáticos
 - **Necesita**: Snapshots automáticos, Replicación de BD
@@ -169,13 +168,14 @@ Las historias de usuario están organizadas por **Épicas** (grupos funcionales)
 **US-06**: Como visitante, quiero ver todos los sitios aprobados en el mapa para descubrir lugares
 
 **US-07**: Como usuario, quiero filtrar sitios por categoría para encontrar lo que busco
+
 ---
 
 ### **Épica 3: Interacción Social**
 
 **US-08**: Como usuario, quiero guardar sitios como favoritos para visitarlos después
 
-**US-9**: Como usuario, quiero comentar en un sitio para compartir mi experiencia
+**US-09**: Como usuario, quiero comentar en un sitio para compartir mi experiencia
 
 **US-10**: Como usuario, quiero comentar en un sitio para compartir mi experiencia con la comunidad.
 
@@ -204,58 +204,33 @@ Las historias de usuario están organizadas por **Épicas** (grupos funcionales)
 El MVP de CultureMap incluye las funcionalidades **mínimas e indispensables** para validar el concepto:
 
 **Incluido en MVP (Fases 1-2)**:
-✅ Autenticación básica (registro/login)
-✅ Roles: Admin y Usuario (sin Organizador todavía)
-✅ CRUD de Sitios culturales
-✅ Mapa interactivo con Leaflet
-✅ Sistema de moderación (aprobar/rechazar)
-✅ Favoritos
-✅ Comentarios y votos
-✅ Filtros por categoría
+- ✅ Autenticación básica (registro/login)
+- ✅ Roles: Admin y Usuario (sin Organizador todavía)
+- ✅ CRUD de Sitios culturales
+- ✅ Mapa interactivo con Leaflet
+- ✅ Sistema de moderación (aprobar/rechazar)
+- ✅ Favoritos
+- ✅ Comentarios y votos
+- ✅ Filtros por categoría
 
 **NO incluido en MVP** (se añadirá después):
-❌ Eventos temporales
-❌ Notificaciones push
-❌ Sistema de recomendaciones
-❌ Heatmap
-❌ Rutas culturales
-❌ Rol "Organizador"
+- ❌ Eventos temporales
+- ❌ Notificaciones push
+- ❌ Sistema de recomendaciones
+- ❌ Heatmap
+- ❌ Rutas culturales
+- ❌ Rol "Organizador"
 
 ---
 
-## 📋 Issues y Milestones
-
-### **Milestones Configurados**
-
-Los hitos del proyecto están organizados en GitHub Milestones:
-
-1. **Milestone 1**: Hito 1 - Repositorio de pácticas y definición del proyecto. (actual)
-   - Fecha límite: [tu fecha]
-   - Issues: #1, #2, #3
-
-2. **Milestone 2**: Integración continua
-   - Fecha límite: +2 semanas
-   - Issues pendientes de crear
-
-3. **Milestone 3**: Frontend + Mapa Interactivo
-   - Fecha límite: +4 semanas
-
-4. **Milestone 4**: Deploy en Cloud + CI/CD
-   - Fecha límite: +6 semanas
-
-5. **Milestone 5**: Features Avanzadas
-   - Fecha límite: +8 semanas
+## 📋 Issues
 
 ### **Issues Creados para el Hito 1**
 
 Los siguientes Issues han sido creados y asignados al Milestone 1:
 
-- **#1**: Configurar entorno Git y GitHub (SSH, 2FA, perfil) ✅ CERRADO
-- **#2**: Crear estructura del repositorio y documentación ✅ CERRADO
-- **#3**: Redactar README con descripción del problema
-- **#4**: Definir User Stories y asignarlas a Issues
-- **#5**: Crear diagrama de arquitectura cloud
-- **#6**: Documentar configuración del entorno
+- **#1**: Configurar entorno GitHub inicial y crear README inicial ✅ CERRADO
+- **#2**: Documentar Hito1 (hito1.md) ✅ CERRADO
 
 ---
 
@@ -299,8 +274,8 @@ Incluyen:
 - [✅] 2FA activado en GitHub
 - [✅] Documentación de configuración del entorno
 - [✅] User Stories definidas y documentadas
-- [x] Issues creados y asignados a Milestones
-- [x] Commits descriptivos y bien formateados
+- [✅] Issues creados y asignados a Milestones
+- [✅] Commits descriptivos y bien formateados
 - [✅] Justificación clara del despliegue en la nube
 - [✅] Lógica de negocio explicada (más allá de CRUD)
 
