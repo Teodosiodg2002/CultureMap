@@ -4,13 +4,11 @@
 
 Este primer hito tiene como objetivo:
 
-1. ✅ Configurar correctamente el entorno de desarrollo (Git, GitHub, SSH)
-1. ✅ Crear el repositorio del proyecto con estructura profesional
-1. ✅ Definir claramente el problema que resuelve CultureMap
+1. ✅ Configurar el entorno de desarrollo (Git, GitHub, SSH)
+1. ✅ Crear el repositorio del proyecto
+1. ✅ Definir el problema que resuelve CultureMap
 1. ✅ Justificar por qué necesita despliegue en la nube
 1. ✅ Establecer las historias de usuario (User Stories)
-1. ✅ Configurar Issues e Hitos para organizar el trabajo
-1. ✅ Documentar las decisiones tomadas
 
 ---
 
@@ -109,10 +107,8 @@ CultureMap **necesita la nube** por las siguientes razones:
 - Gestión de permisos y roles
 
 ### **2. Alta Disponibilidad y Accesibilidad**
-- Acceso 24/7 desde web y móvil
-- Usuarios acceden desde diferentes ubicaciones
-- No puede caerse durante eventos importantes
-- **Necesita**: Load Balancer, Multi-AZ deployment
+- Acceso 24/7 desde la web
+- Los usuarios acceden desde diferentes ubicaciones
 
 ### **3. Escalabilidad según demanda**
 - Crecimiento progresivo de usuarios
@@ -127,7 +123,7 @@ CultureMap **necesita la nube** por las siguientes razones:
 CultureMap **no es un simple CRUD**. Incluye la siguiente lógica de negocio:
 
 ### **1. Moderación y Calidad de Contenido**
-- **Aprobación**: cada propuesta (evento o sitio) pasa de Pendiente a Aprobado/Rechazado por parte de moderadores u organizadores.
+- **Aprobación**: cada propuesta (evento o sitio) pasa de Pendiente a Aprobado/Rechazado por parte de organizadores.
 - **Priorización de contenidos**: Sitios con más votos aparecen primero
 - **Detección de duplicados**: Evitar que se propongan sitios repetidos
 - **Sistema de reportes**: Usuarios pueden reportar contenido inapropiado
@@ -157,6 +153,8 @@ Las historias de usuario están organizadas por **Épicas** (grupos funcionales)
 
 **US-03**: Como administrador, quiero asignar roles a usuarios (ej. organizadores) para dar permisos especiales.
 
+---
+
 ### **Épica 2: Gestión de Sitios Culturales**
 
 **US-04**: Como usuario, quiero proponer un nuevo sitio cultural para compartirlo con la comunidad
@@ -177,19 +175,17 @@ Las historias de usuario están organizadas por **Épicas** (grupos funcionales)
 
 ---
 
-### **Épica 4: Eventos Temporales** (Fase 2)
+### **Épica 4: Eventos Temporales**
 
-**US-10**: Como organizador, quiero publicar un evento cultural para darle visibilidad
+**US-10**: Como organizador, quiero publicar un evento para darle visibilidad
 
-**US-11**: Como usuario, quiero ver eventos próximos en el mapa para planificar mi agenda
-
-**US-12**: Como usuario, quiero recibir notificaciones de eventos cerca de mis sitios favoritos
+**US-11**: Como usuario, quiero ver los próximos eventos en el mapa para planificar mi agenda
 
 ---
 
 ### **Épica 5: Búsqueda y Descubrimiento**
 
-**US-13**: Como usuario, quiero buscar sitios por nombre o categoría para localizarlos fácilmente.
+**US-12**: Como usuario, quiero buscar sitios por nombre o categoría.
 
 ---
 
@@ -199,7 +195,7 @@ Las historias de usuario están organizadas por **Épicas** (grupos funcionales)
 
 El MVP de CultureMap incluye las funcionalidades **mínimas e indispensables** para validar el concepto:
 
-**Incluido en MVP (Fases 1-2)**:
+**Incluido en MVP**:
 - ✅ Autenticación básica (registro/login)
 - ✅ Roles: Admin y Usuario (sin Organizador todavía)
 - ✅ CRUD de Sitios culturales
@@ -257,24 +253,4 @@ Incluyen:
 
 ---
 
-## ✅ Checklist de Completitud del Hito 1
-
-- [✅] Repositorio creado en GitHub
-- [✅] README.md completo con descripción del problema
-- [✅] LICENSE (MIT) añadida
-- [✅] .gitignore configurado
-- [✅] Estructura de carpetas (`docs/`, `docs/hitos/`, etc.)
-- [✅] Git configurado localmente (nombre, email)
-- [✅] Claves SSH generadas y añadidas a GitHub
-- [✅] Perfil de GitHub completado (foto, bio, ubicación)
-- [✅] 2FA activado en GitHub
-- [✅] Documentación de configuración del entorno
-- [✅] User Stories definidas y documentadas
-- [✅] Issues creados y asignados a Milestones
-- [✅] Commits descriptivos
-- [✅] Justificación clara del despliegue en la nube
-- [✅] Lógica de negocio explicada (más allá de CRUD)
-
----
-
-_Documento completado el [3/10/2025]_
+_Documento completado el [6/10/2025]_
