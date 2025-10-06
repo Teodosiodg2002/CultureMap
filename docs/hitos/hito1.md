@@ -230,11 +230,8 @@ Los siguientes Issues han sido creados y asignados al Milestone 1:
 | Tipo      | Nombre |
 | ----      | ------ |
 | Framework | Django |
-| ----      | ------ |
 | Backend   | Python |
-| ----      | ------ |
 | IDE       | VSCode |
-| ----      | ------ |
 
 ### **Licencia del Proyecto**
 
