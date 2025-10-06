@@ -52,7 +52,7 @@ Actualmente, cuando se visita cualquier ciudad o pueblo, los sitios para ver o l
 
 ## Público Objetivo
 
-1. **Ciudadanos curiosos y turistas responsables**
+1. **Personas curiosas y turistas responsables**
    - Buscan experiencias locales auténticas
    - Quieren evitar trampas turísticas
    - Valoran la cultura independiente
@@ -71,16 +71,6 @@ Actualmente, cuando se visita cualquier ciudad o pueblo, los sitios para ver o l
 
 ---
 
-## ☁️ Arquitectura Cloud
-
-### **¿Por qué Cloud Computing?**
-
-CultureMap se beneficia de manera **importante** del despliegue en la nube:
-  
-- ✅ **Multiusuario**: Permite que distintos usuario con distintos roles incluyan sitios o eventos variados
-- ✅ **Alta disponibilidad**: Acceso 24/7 desde cualquier dispositivo  
-- ✅ **Almacenamiento distribuido**: Muchas imagenes de sitios y eventos     
-
 ## 📚 Documentación de Hitos
 
 - 📄 [**Hito 1**: Repositorio y Definición del Proyecto](docs/hitos/hito1.md)
@@ -89,7 +79,7 @@ CultureMap se beneficia de manera **importante** del despliegue en la nube:
 
 ## 🛠️ Tecnologías
 
-****(En proceso)***
+***(En proceso)***
 
 ---
 
@@ -116,4 +106,4 @@ Proyecto desarrollado como parte de la asignatura de **Cloud Computing** del Má
 
 ---
 
-_Última actualización: [3/10/2025]_
+_Última actualización: [6/10/2025]_
