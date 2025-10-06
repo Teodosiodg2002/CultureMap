@@ -61,28 +61,37 @@ Se ha configurado el entorno de desarrollo:
 
 ### **Problema Identificado**
 
-- ❌ **Los sitios a visitar en Granada (y en general) son siempre los mismos**, y para encontrar nuevos, es necesario buscar entre muchas páginas  
-- ❌ **Eventos pequeños y con poca participación**: Conciertos en bares, exposiciones en galerías pequeñas, charlas en espacios culturales no aparecen en p lataformas grandes
-- ❌ **Sitios auténticos ocultos**: Miradores únicos, bares con encanto, tiendas locales, arte urbano... no están bien documentados
-- ❌ **Información dispersa**: Los eventos culturales están repartidos en Instagram, Facebook, carteles físicos, boca a boca
-- ❌ **Turismo masificado**: Los turistas siempre terminan en los mismos lugares (Alhambra, Albaicín), perdiendo la esencia local de barrios como Realejo, Zaidín o Chana
-- ❌ **Difícil descubrir eventos universitarios**: La Universidad de Granada tiene mucha actividad cultural (conferencias, exposiciones, música) que no se visibiliza bien
+❌ **Los sitios a visitar en Granada (y en general) son siempre los mismos**, y para encontrar nuevos, es necesario buscar entre muchas páginas
+
+❌ **Eventos pequeños y con poca participación**: Conciertos en bares, exposiciones en galerías pequeñas, charlas en espacios culturales no aparecen en p lataformas grandes
+
+❌ **Sitios auténticos ocultos**: Miradores únicos, bares con encanto, tiendas locales, arte urbano... no están bien documentados
+
+❌ **Información dispersa**: Los eventos culturales están repartidos en Instagram, Facebook, carteles físicos, boca a boca
+
+❌ **Turismo masificado**: Los turistas siempre terminan en los mismos lugares (Alhambra, Albaicín), perdiendo la esencia local de barrios como Realejo, Zaidín o Chana
+
+❌ **Difícil descubrir eventos universitarios**: La Universidad de Granada tiene mucha actividad cultural (conferencias, exposiciones, música) que no se visibiliza bien
 
 ### **Solución Propuesta: CultureMap**
 
 Una plataforma web colaborativa que:
 
-- ✅ **Centraliza** toda la oferta cultural de Granada en un solo mapa interactivo
-- ✅ **Da fuerza a la comunidad** para proponer y validar contenidos (sitios y eventos)
-- ✅ **Diferencia contenido temporal y permanente**:
+✅ **Centraliza** toda la oferta cultural de Granada en un solo mapa interactivo
+
+✅ **Da fuerza a la comunidad** para proponer y validar contenidos (sitios y eventos)
+
+✅ **Diferencia contenido temporal y permanente**:
  - **Eventos**: Conciertos, exposiciones, charlas (con fecha de inicio/fin)
  - **Sitios**: Miradores, bares, galerías, tiendas (permanentes)
-- ✅ **Sistema de roles**:
+
+✅ **Sistema de roles**:
  - **Administradores**: Moderan contenido
  - **Organizadores**: Grupos culturales que publican directamente
  - **Usuarios**: Proponen sitios/eventos, votan, comentan
  - **Visitantes**: Consultan el mapa sin necesidad de registrarse
-- ✅ **Funcionalidades sociales**:
+ 
+ ✅ **Funcionalidades sociales**:
  - Guardar favoritos
  - Comentar y valorar sitios/eventos
  - Compartir descubrimientos
