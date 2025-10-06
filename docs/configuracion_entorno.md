@@ -72,7 +72,6 @@ Software instalado:
 | ----------- | ------- | --------------------- |
 | Git         | 2.49.0  | Control de versiones  |
 | Python      | 3.13.7  | Backend / scripts     |
-| Node.js     | 18+ LTS | Herramientas frontend |
 | VS Code     | Latest  | Editor de código      |
 | Postman     | Latest  | Testing de APIs       |
 
