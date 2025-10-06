@@ -209,7 +209,6 @@ El MVP de CultureMap incluye las funcionalidades **mínimas e indispensables** p
 - ❌ Eventos temporales
 - ❌ Notificaciones push
 - ❌ Sistema de recomendaciones
-- ❌ Heatmap
 - ❌ Rutas culturales
 - ❌ Rol "Organizador"
 
@@ -228,7 +227,14 @@ Los siguientes Issues han sido creados y asignados al Milestone 1:
 
 ## 🏗️ Decisiones Técnicas
 
-***(En proceso)***
+| Tipo      | Nombre |
+| ----      | ------ |
+| Framework | Django |
+| ----      | ------ |
+| Backend   | Python |
+| ----      | ------ |
+| IDE       | VSCode |
+| ----      | ------ |
 
 ### **Licencia del Proyecto**
 
