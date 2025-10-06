@@ -61,41 +61,32 @@ Se ha configurado el entorno de desarrollo:
 
 ### **Problema Identificado**
 
-❌ **Los sitios a visitar en Granada (y en general) son siempre los mismos**, y para encontrar nuevos, es necesario buscar entre muchas páginas  
-
-❌ **Eventos pequeños y con poca participación**: Conciertos en bares, exposiciones en galerías pequeñas, charlas en espacios culturales no aparecen en plataformas grandes
-
-❌ **Sitios auténticos ocultos**: Miradores únicos, bares con encanto, tiendas locales, arte urbano... no están bien documentados
-
-❌ **Información dispersa**: Los eventos culturales están repartidos en Instagram, Facebook, carteles físicos, boca a boca
-
-❌ **Turismo masificado**: Los turistas siempre terminan en los mismos lugares (Alhambra, Albaicín), perdiendo la esencia local de barrios como Realejo, Zaidín o Chana
-
-❌ **Difícil descubrir eventos universitarios**: La Universidad de Granada tiene mucha actividad cultural (conferencias, exposiciones, música) que no se visibiliza bien
+- ❌ **Los sitios a visitar en Granada (y en general) son siempre los mismos**, y para encontrar nuevos, es necesario buscar entre muchas páginas  
+- ❌ **Eventos pequeños y con poca participación**: Conciertos en bares, exposiciones en galerías pequeñas, charlas en espacios culturales no aparecen en p lataformas grandes
+- ❌ **Sitios auténticos ocultos**: Miradores únicos, bares con encanto, tiendas locales, arte urbano... no están bien documentados
+- ❌ **Información dispersa**: Los eventos culturales están repartidos en Instagram, Facebook, carteles físicos, boca a boca
+- ❌ **Turismo masificado**: Los turistas siempre terminan en los mismos lugares (Alhambra, Albaicín), perdiendo la esencia local de barrios como Realejo, Zaidín o Chana
+- ❌ **Difícil descubrir eventos universitarios**: La Universidad de Granada tiene mucha actividad cultural (conferencias, exposiciones, música) que no se visibiliza bien
 
 ### **Solución Propuesta: CultureMap**
 
 Una plataforma web colaborativa que:
 
-✅ **Centraliza** toda la oferta cultural de Granada en un solo mapa interactivo
-
-✅ **Da fuerza a la comunidad** para proponer y validar contenidos (sitios y eventos)
-
-✅ **Diferencia contenido temporal y permanente**:
-- **Eventos**: Conciertos, exposiciones, charlas (con fecha de inicio/fin)
-- **Sitios**: Miradores, bares, galerías, tiendas (permanentes)
-
-✅ **Sistema de roles**:
-- **Administradores**: Moderan contenido
-- **Organizadores**: Grupos culturales que publican directamente
-- **Usuarios**: Proponen sitios/eventos, votan, comentan
-- **Visitantes**: Consultan el mapa sin necesidad de registrarse
-
-✅ **Funcionalidades sociales**:
-- Guardar favoritos
-- Comentar y valorar sitios/eventos
-- Compartir descubrimientos
-- Valorar y puntuar los lugares y/o eventos
+- ✅ **Centraliza** toda la oferta cultural de Granada en un solo mapa interactivo
+- ✅ **Da fuerza a la comunidad** para proponer y validar contenidos (sitios y eventos)
+- ✅ **Diferencia contenido temporal y permanente**:
+ - **Eventos**: Conciertos, exposiciones, charlas (con fecha de inicio/fin)
+ - **Sitios**: Miradores, bares, galerías, tiendas (permanentes)
+- ✅ **Sistema de roles**:
+ - **Administradores**: Moderan contenido
+ - **Organizadores**: Grupos culturales que publican directamente
+ - **Usuarios**: Proponen sitios/eventos, votan, comentan
+ - **Visitantes**: Consultan el mapa sin necesidad de registrarse
+- ✅ **Funcionalidades sociales**:
+ - Guardar favoritos
+ - Comentar y valorar sitios/eventos
+ - Compartir descubrimientos
+ - Valorar y puntuar los lugares y/o eventos
 
 ---
 
@@ -103,7 +94,7 @@ Una plataforma web colaborativa que:
 
 CultureMap **necesita la nube** por las siguientes razones:
 
-### **1. Naturaleza Multiusuario y Colaborativa**
+### **1. Multiusuario y Colaborativo**
 - Múltiples usuarios añden contenido simultáneamente
 - Sincronización en tiempo real del mapa
 - Gestión de permisos y roles
@@ -114,13 +105,11 @@ CultureMap **necesita la nube** por las siguientes razones:
 - No puede caerse durante eventos importantes
 - **Necesita**: Load Balancer, Multi-AZ deployment
 
-### **3. Escalabilidad según Demanda**
+### **3. Escalabilidad según demanda**
 - Crecimiento progresivo de usuarios
 
-### **4. Backup y Recuperación**
-- Datos comunitarios valiosos (contenido generado por usuarios)
-- Necesidad de backups automáticos
-- **Necesita**: Snapshots automáticos, Replicación de BD
+### **4. Almacenamiento distribuido**
+- Muchas imagenes de sitios y eventos
 
 ---
 
