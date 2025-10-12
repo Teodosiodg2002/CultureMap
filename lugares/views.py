@@ -1,3 +1,6 @@
 from django.shortcuts import render
+from .models import Lugar
 
-# Create your views here.
+def index(request):
+    lugares = Lugar.objects.all()  # Trae todos los lugares de la base de datos
+    return render(request, 'lugares/index.html', {'lugares': lugares})
