@@ -74,6 +74,7 @@ Actualmente, cuando se visita cualquier ciudad o pueblo, los sitios para ver o l
 ## 📚 Documentación de Hitos
 
 - 📄 [**Hito 1**: Repositorio y Definición del Proyecto](docs/hitos/hito1.md)
+- 📄 [**Hito 2**: Integración Continua (CI)](docs/hitos/hito2.md)
 
 ---
 
