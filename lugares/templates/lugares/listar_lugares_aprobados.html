@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CultureMap - Lugares Aprobados</title>
+</head>
+<body>
+    <h1>Lugares de interés aprobados</h1>
+    
+    <ul>
+        {% for lugar in lugares %}
+            <li>
+                <a href="{% url 'detalle_lugar' lugar.pk %}">
+                    {{ lugar.nombre }}
+                </a>
+                - {{ lugar.get_categoria_display }}
+            </li>
+        {% empty %}
+            <li>No hay lugares aprobados todavía.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

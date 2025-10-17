@@ -129,7 +129,7 @@ class Lugar(models.Model):
     # ──────────────────────────────────────────────────────────────────────
     
     creado_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="lugares_creados", verbose_name=_("Creado por"), blank=True)    
-    creado_en = models.DateTimeField(auto_now_add=True, vebose_name=_("Fecha de creación"), db_index=True)
+    creado_en = models.DateTimeField(auto_now_add=True, verbose_name=_("Fecha de creación"), db_index=True)
     actualizado_en = models.DateTimeField(auto_now=True, verbose_name=_("Última actualización"))
     
     # ──────────────────────────────────────────────────────────────────────
