@@ -14,17 +14,16 @@ El objetivo principal de este hito es implementar **Integración Continua (CI)**
 
 ## 🏗️ Desarrollo del Backend (CRUD Básico)
 
-Antes de comenzar con la ejecución de los test, he creado el modelo `Lugar` donde 
-
-Antes de poder probar la aplicación, he desarrollado las funcionalidades de **leer y listar** para el modelo `Lugar`. Esto nos permite tener una base para poder escribir y probar los test.
+Antes de comenzar con la ejecución de los test, he desarrollado las funcionalidades de **leer y listar** para el modelo `Lugar`. Esto nos permite tener una base para poder escribir y probar los test. 
 
 ### **Vistas y Lógica de Negocio (`views.py`)**
 
 Se han implementado las siguientes vistas principales:
 
 -   **`listar_lugares_todos`**: Muestra una lista de todos los lugares.
--   **`listar_lugares_aprobados`**: Muestra una lista de todos los lugares que han sido aprobados por un administrador y están marcados como publicados. Esto asegura que solo el contenido validado es visible para el público.
--   **`detalle_lugar`**: Muestra la página de detalle de un lugar específico. Utiliza `get_object_or_404` para devolver un error 404 si se intenta acceder a un lugar que no existe o no está aprobado, protegiendo el acceso a contenido no validado.
+-   **`listar_lugares_aprobados`**: Muestra una lista de todos los lugares que han sido aprobados por un administrador y están marcados como publicados.
+-   **`detalle_lugar`**: Muestra la página de detalle de un lugar específico. Utiliza `get_object_or_404` para devolver un error 404 si se intenta acceder a un lugar que no existe o no está aprobado.
+
 
 Se han creado dos vistas para listar los lugares. Un de ellas muestra todos los lugares y la otra, solo muestra aquellos que estan aprobados. Probablemente esto varíe a lo largo del desarrollo de la aplicación, pero de momento lo he implementado para comprobar que se esten ejecutando distintos métodos correctamente.
 
@@ -54,7 +53,7 @@ Para facilitar el desarrollo y las pruebas, se ha creado una **migración de dat
 
 ---
 
-## 🔧 Elección de Herramientas de Testing (En Progreso)
+## 🔧 Elección de Herramientas de Testing
 
 
 ### **1. Gestor de Tareas**
@@ -64,9 +63,23 @@ Para facilitar el desarrollo y las pruebas, se ha creado una **migración de dat
 
 ### **2. Marco de Pruebas y Biblioteca de Aserciones**
 
-* **Decisión**: Framework de testing integrado de Django (`unittest`).
-* **Justificación**: *(...pendiente...)*
+* **Decisión**: Framework de testing integrado de Django (basado en `unittest` de Python).
+* **Justificación**: Se ha elegido el framework nativo de Django por su **integración total** con el proyecto. Permite:
+    * **Creación de una BD de pruebas** automática en cada ejecución, aislando los tests de los datos de desarrollo.
+    * **Un cliente de pruebas (`self.client`)** para simular peticiones HTTP (GET, POST) y probar las vistas de forma realista sin un navegador.
+    * **Aserciones específicas de Django** como `self.assertContains()` y `self.assertNotContains()`, que facilitan la comprobación del contenido HTML renderizado.
 
+### **3. Tests Implementados**
+
+Se han implementado **4 tests** en `lugares/tests.py` que validan la lógica de negocio principal:
+
+* **Test de Modelo (`LugarModelTests`)**:
+    * `test_propiedad_es_visible`: Valida que la propiedad `es_visible` del modelo `Lugar` funciona correctamente, devolviendo `True` para lugares aprobados y `False` para los pendientes.
+
+* **Tests de Vista (`LugarViewTests`)**:
+    * `test_vista_lista_aprobados_funciona`: Comprueba que la lista pública (`/lugares/aprobados/`) carga (código 200), muestra el lugar aprobado y **oculta** el lugar pendiente.
+    * `test_vista_detalle_funciona_para_lugar_aprobado`: Comprueba que la página de detalle de un lugar aprobado es accesible (código 200).
+    * `test_vista_detalle_da_404_para_lugar_pendiente`: Valida la lógica de seguridad, asegurando que intentar acceder al detalle de un lugar no aprobado devuelve un error `404 Not Found`.
 ---
 
 ## ⚙️ Integración Continua (CI)
@@ -76,4 +89,4 @@ Para facilitar el desarrollo y las pruebas, se ha creado una **migración de dat
 
 ---
 
-_Documento actualizado el [14/10/2025]_
+_Documento actualizado el [19/10/2025]_
