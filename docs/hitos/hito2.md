@@ -85,7 +85,8 @@ Se han implementado **4 tests** en `lugares/tests.py` que validan la lógica de 
 ## ⚙️ Integración Continua (CI)
 
 * **Sistema Elegido**: GitHub Actions.
-* **Justificación**: *(...pendiente...)*
+* **Justificación**: Se ha seleccionado por ser la solución nativa de GitHub, lo que elimina la necesidad de configurar servicios de terceros. Es gratuita para repositorios públicos y se configura mediante un simple archivo YAML (`.github/workflows/django-ci.yml`) dentro del propio repositorio.
+**Estado**: **Completado**. Se ha configurado el workflow `django-ci.yml`. Tras corregir la versión de Python a 3.11, el workflow se ejecuta correctamente. Ahora, cada `push` o `pull_request` a la rama `main` disparará automáticamente la ejecución de la suite de tests (`python manage.py test`), asegurando que no se integre código roto en la rama principal.
 
 ---
 
