@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>CultureMap - Lugares Aprobados</title>
-</head>
-<body>
+{% extends 'lugares/home.html' %}
+
+{% block title %}Lugares Aprobados - CultureMap{% endblock %}
+
+{% block content %}
     <h1>Lugares de interés aprobados</h1>
     
     <ul>
@@ -18,5 +17,4 @@
             <li>No hay lugares aprobados todavía.</li>
         {% endfor %}
     </ul>
-</body>
-</html>
+{% endblock %}
