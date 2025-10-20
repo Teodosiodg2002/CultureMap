@@ -1,17 +1,29 @@
 {% extends 'lugares/base.html' %}
 {% block title %} Todos los lugares (algunos sin aprobar) - CultureMap {% endblock %}
 {%block content%}
-    <h1> Todos los lugares aprobados </h1>
-    <ul>
+    <h1 class="mb-4">Todos los lugares</h1>
+    
+    <div class="row">
+        
         {% for lugar in lugares %}
-            <li>
-                <a href="{% url 'detalle_lugar' lugar.pk %}">
-                    {{ lugar.nombre }}
-                </a>
-                - {{ lugar.get_categoria_display }}
-            </li>
+        <div class="col-md-6 col-lg-4 mb-4">
+            
+            <div class="card h-100"> <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ lugar.nombre }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ lugar.get_categoria_display }}</h6>
+                    
+                    <p class="card-text">{{ lugar.descripcion|truncatewords:20 }}</p>
+                    
+                    <a href="{% url 'detalle_lugar' lugar.pk %}" class="btn btn-primary mt-auto">Ver detalles</a>
+                </div>
+            </div>
+        </div>
         {% empty %}
-            <li>No hay lugares todavía.</li>
+            <div class="col">
+                <div class="alert alert-info" role="alert">
+                    No hay lugares aprobados todavía.
+                </div>
+            </div>
         {% endfor %}
-    </ul>
+    </div>
 {%endblock%}
