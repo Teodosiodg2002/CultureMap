@@ -1,11 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>CultureMap - Todos los Lugares</title>
-</head>
-<body>
-    <h1>Lugares de interés</h1>
-    
+{% extends 'lugares/base.html' %}
+{% block title %} Todos los lugares (algunos sin aprobar) - CultureMap {% endblock %}
+{%block content%}
+    <h1> Todos los lugares aprobados </h1>
     <ul>
         {% for lugar in lugares %}
             <li>
@@ -15,8 +11,7 @@
                 - {{ lugar.get_categoria_display }}
             </li>
         {% empty %}
-            <li>No hay lugares aprobados todavía.</li>
+            <li>No hay lugares todavía.</li>
         {% endfor %}
     </ul>
-</body>
-</html>
+{%endblock%}
