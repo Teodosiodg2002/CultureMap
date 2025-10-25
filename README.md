@@ -80,7 +80,9 @@ Actualmente, cuando se visita cualquier ciudad o pueblo, los sitios para ver o l
 
 ## 🛠️ Tecnologías
 
-***(En proceso)***
+- Django: Python framework
+- GitHub Action
+- Bootstrap
 
 ---
 
