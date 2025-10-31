@@ -43,12 +43,18 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a
-                class="nav-link active"
-                href="{% url 'listar_lugares_aprobados' %}"
+              <a class="nav-link active" href="{% url 'index_lugares' %}"
                 >Lugares</a
               >
             </li>
+
+            {% if user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'crear_lugar' %}"
+                >Proponer Lugar</a
+              >
+            </li>
+            {% endif %}
           </ul>
 
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0">

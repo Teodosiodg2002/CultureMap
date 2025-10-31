@@ -3,15 +3,7 @@ from .models import Lugar, EstadoAprobacion
 from .forms import LugarForm
 from django.contrib.auth.decorators import login_required
 
-
-def listar_lugares_todos(request):
-    lugares = Lugar.objects.all()  # Trae todos los lugares de la base de datos
-    return render(request, "lugares/listar_lugares_todos.html", {"lugares": lugares})
-
-
-# lugares/views.py
-
-def listar_lugares_aprobados(request):
+def index_lugares(request):
     
     lugares_aprobados = Lugar.objects.filter(estado=EstadoAprobacion.APROBADO, publicado=True)
 
@@ -21,8 +13,7 @@ def listar_lugares_aprobados(request):
         'lugares': lugares_aprobados,
         'lugares_para_mapa': lugares_para_mapa  
     }
-    return render(request, 'lugares/listar_lugares_aprobados.html', context)
-
+    return render(request, 'lugares/index_lugares.html', context)
 
 def detalle_lugar(request, pk):
     lugar = get_object_or_404(
@@ -46,7 +37,7 @@ def crear_lugar(request):
 
             lugar.save()
 
-            return redirect("detalle_lugar", pk=lugar.pk)
+            return redirect('index_lugares')
 
     else:
         form = LugarForm()
