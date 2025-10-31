@@ -9,11 +9,19 @@ def listar_lugares_todos(request):
     return render(request, "lugares/listar_lugares_todos.html", {"lugares": lugares})
 
 
+# lugares/views.py
+
 def listar_lugares_aprobados(request):
-    lugares = Lugar.objects.filter(estado=EstadoAprobacion.APROBADO, publicado=True)
-    return render(
-        request, "lugares/listar_lugares_aprobados.html", {"lugares": lugares}
-    )
+    
+    lugares_aprobados = Lugar.objects.filter(estado=EstadoAprobacion.APROBADO, publicado=True)
+
+    lugares_para_mapa = lugares_aprobados.exclude(lat__isnull=True, lng__isnull=True)
+
+    context = {
+        'lugares': lugares_aprobados,
+        'lugares_para_mapa': lugares_para_mapa  
+    }
+    return render(request, 'lugares/listar_lugares_aprobados.html', context)
 
 
 def detalle_lugar(request, pk):
