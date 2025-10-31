@@ -1,0 +1,30 @@
+{% extends 'lugares/base.html' %}
+
+{% block title %}Iniciar Sesión - CultureMap{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-sm"> <div class="card-body">
+        <h2 class="card-title text-center mb-4">Iniciar Sesión</h2>
+        
+        <form method="post">
+          {% csrf_token %}
+          
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+              {% for error in form.non_field_errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          {{ form.as_p }}
+          
+          <button type="submit" class="btn btn-primary w-100 mt-3">Entrar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
