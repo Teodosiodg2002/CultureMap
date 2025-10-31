@@ -122,4 +122,5 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGOUT_REDIRECT_URL = 'listar_lugares_aprobados'
+LOGOUT_REDIRECT_URL = 'index_lugares'
+LOGIN_REDIRECT_URL = 'index_lugares'
