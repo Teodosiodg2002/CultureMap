@@ -2,6 +2,8 @@ from django.shortcuts import redirect, render, get_object_or_404
 from .models import Lugar, EstadoAprobacion
 from .forms import LugarForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login 
+from .forms import UserRegistrationForm 
 
 def index_lugares(request):
     
@@ -43,3 +45,21 @@ def crear_lugar(request):
         form = LugarForm()
 
     return render(request, "lugares/crear_lugar.html", {"form": form})
+
+def register(request):
+    # 1. Si el usuario ya está logueado, lo redirigimos a la página principal
+    if request.user.is_authenticated:
+        return redirect('index_lugares')
+
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST)
+
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('index_lugares')
+
+    else:
+        form = UserRegistrationForm()
+
+    return render(request, 'registration/register.html', {'form': form})
