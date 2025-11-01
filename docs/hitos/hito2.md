@@ -67,27 +67,39 @@ Para facilitar el desarrollo y las pruebas, se ha creado una **migración de dat
 * **Justificación**: Se ha elegido el framework nativo de Django por su **integración total** con el proyecto. Permite:
     * **Creación de una BD de pruebas** automática en cada ejecución, aislando los tests de los datos de desarrollo.
     * **Un cliente de pruebas (`self.client`)** para simular peticiones HTTP (GET, POST) y probar las vistas de forma realista sin un navegador.
-    * **Aserciones específicas de Django** como `self.assertContains()` y `self.assertNotContains()`, que facilitan la comprobación del contenido HTML renderizado.
+    * **Aserciones específicas de Django** como self.assertContains(), self.assertNotContains() y self.assertRedirects().
 
 ### **3. Tests Implementados**
 
-Se han implementado **4 tests** en `lugares/tests.py` que validan la lógica de negocio principal:
+Se ha implementado un conjunto de 8 tests en lugares/tests.py que validan lo siguiente:
 
-* **Test de Modelo (`LugarModelTests`)**:
-    * `test_propiedad_es_visible`: Valida que la propiedad `es_visible` del modelo `Lugar` funciona correctamente, devolviendo `True` para lugares aprobados y `False` para los pendientes.
+#### **Test de Modelo (LugarModelTests):**
 
-* **Tests de Vista (`LugarViewTests`)**:
-    * `test_vista_lista_aprobados_funciona`: Comprueba que la lista pública (`/lugares/aprobados/`) carga (código 200), muestra el lugar aprobado y **oculta** el lugar pendiente.
-    * `test_vista_detalle_funciona_para_lugar_aprobado`: Comprueba que la página de detalle de un lugar aprobado es accesible (código 200).
-    * `test_vista_detalle_da_404_para_lugar_pendiente`: Valida la lógica de seguridad, asegurando que intentar acceder al detalle de un lugar no aprobado devuelve un error `404 Not Found`.
+* **test_propiedad_es_visible:** Valida que la propiedad es_visible del modelo Lugar funciona correctamente.
+
+#### **Tests de Vista (LugarViewTests):**
+
+* **test_vista_index_lugares_funciona:** (Test actualizado) Comprueba que la lista pública (index_lugares) carga (código 200) y filtra correctamente (muestra aprobados, oculta pendientes).
+
+* **test_vista_detalle_funciona_para_lugar_aprobado:** Comprueba que el detalle de un lugar aprobado es accesible (código 200).
+
+* **test_vista_detalle_da_404_para_lugar_pendiente:** Valida la lógica de seguridad, asegurando que intentar acceder al detalle de un lugar no aprobado devuelve un error 404.
+
+* **test_login_post_redirects_to_index:** (Nuevo) Prueba que un POST exitoso al formulario de login redirige a la página principal (index_lugares), validando la configuración LOGIN_REDIRECT_URL.
+
+* **test_protected_view_redirects_to_login:** (Nuevo) Prueba que la vista crear_lugar (protegida con @login_required) redirige correctamente a un usuario anónimo a la página de login.
+
+* **test_crear_lugar_get_authenticated_user:** (Nuevo) Prueba que un usuario logueado puede acceder (código 200) al formulario para crear un lugar.
+
+* **test_crear_lugar_post_authenticated_user:** (Nuevo) Prueba que un usuario logueado puede enviar (POST) un nuevo lugar, que este se crea con el estado correcto ('pendiente') y el creado_por correcto, y que redirige al index_lugares.
 ---
 
 ## ⚙️ Integración Continua (CI)
 
 * **Sistema Elegido**: GitHub Actions.
 * **Justificación**: Se ha seleccionado por ser la solución nativa de GitHub, lo que elimina la necesidad de configurar servicios de terceros. Es gratuita para repositorios públicos y se configura mediante un simple archivo YAML (`.github/workflows/django-ci.yml`) dentro del propio repositorio.
-**Estado**: **Completado**. Se ha configurado el workflow `django-ci.yml`. Tras corregir la versión de Python a 3.11, el workflow se ejecuta correctamente. Ahora, cada `push` o `pull_request` a la rama `main` disparará automáticamente la ejecución de la suite de tests (`python manage.py test`), asegurando que no se integre código roto en la rama principal.
+* **Estado**: **Completado**. Se ha configurado el workflow `django-ci.yml`. Tras corregir la versión de Python a 3.11, el workflow se ejecuta correctamente. Ahora, cada `push` o `pull_request` a la rama `main` disparará automáticamente la ejecución de la suite de tests (`python manage.py test`), asegurando que no se integre código roto en la rama principal.
 
 ---
 
-_Documento actualizado el [19/10/2025]_
+_Documento actualizado el [01/11/2025]_
