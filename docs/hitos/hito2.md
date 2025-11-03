@@ -106,10 +106,10 @@ Se ha implementado un conjunto de 8 tests en lugares/tests.py que validan lo sig
 
 A continuación muestro la lista de los test que se han ido ejecutando con cada modificacion. En todas ellas, se observa que el test se ha hecho de manera exitosa:
 
-![Tests](images/check_test.png)
+![Tests](../images/check_test.png)
 
 Aquí, muestro en mas detalle la informacion del test:
 
-![Tests Detalle](images/details-test.png)
+![Tests Detalle](../images/details-test.png)
 
 _Documento actualizado el [03/11/2025]_
