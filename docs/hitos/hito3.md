@@ -32,7 +32,7 @@ Al usar Django en todos los servicios, se aprovecha el conocimiento ya adquirido
 
 ---
 
-## 🚀 2. Diseño de la Arquitectura y API (Rúbrica: 4 puntos)
+## 🚀 2. Diseño de la Arquitectura y API
 
 Para este hito, se ha optado por una arquitectura basada en microservicios, organizada bajo un esquema **“Monorepo”**, es decir, un único repositorio que contiene el código de todos los servicios.
 Además, se ha adoptado el principio **“Database per Service”**, de forma que cada microservicio gestiona su propia base de datos y mantiene así un mayor aislamiento y autonomía.
@@ -80,7 +80,7 @@ A continuación se describen los servicios principales y su papel dentro del eco
 
 ---
 
-## 📝 3. Sistema de Logs (Rúbrica: 2 puntos)
+## 📝 3. Sistema de Logs
 
 Como parte del diseño de los microservicios, se ha tenido en cuenta la necesidad de contar con un **sistema de logs centralizado**, que permita registrar la actividad de cada servicio y facilitar su monitorización.
 Para ello, se ha realizado una pequeña revisión de las principales herramientas disponibles actualmente.
@@ -114,6 +114,6 @@ En este hito se ha optado por preparar los servicios para poder ser monitorizado
 
 ---
 
-## 🧪 4. Ejecución de Tests (Rúbrica: 2 puntos)
+## 🧪 4. Ejecución de Tests
 
 (***Por implementar y comprobar***))
