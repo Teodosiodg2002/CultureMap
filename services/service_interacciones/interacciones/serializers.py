@@ -33,7 +33,7 @@ class VotoSerializer(serializers.ModelSerializer):
             'valor',
             'creado_en'
         ]
-        read_only_fields = ['lugar_id', 'usuario_id', 'creado_en']
+        read_only_fields = ['usuario_id', 'creado_en']
 
 # --- Serializer para Favoritos ---
 class FavoritoSerializer(serializers.ModelSerializer):
