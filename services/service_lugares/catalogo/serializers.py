@@ -38,6 +38,7 @@ class LugarSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'estado',
             'estado_nombre',
+            'creado_por_id',
             'creado_en',
             'esta_aprobado',
             'es_visible',
