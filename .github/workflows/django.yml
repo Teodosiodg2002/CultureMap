@@ -36,5 +36,6 @@ jobs:
 
       - name: Run Tests for ${{ matrix.servicios }}
         run: |
+          echo "Ejecutando tests en $(pwd)"
           python manage.py test
-        working-directory: ${{ matrix.service }}
+        working-directory: ${{ matrix.servicios }}
