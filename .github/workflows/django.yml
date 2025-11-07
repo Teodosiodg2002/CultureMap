@@ -1,4 +1,4 @@
-name: Django CI Test
+name: Django Test
 
 on:
   push:
@@ -28,13 +28,11 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: Install Dependencies for ${{ matrix.servicios }}
+      - name: Install and Test ${{ matrix.servicios }}
         run: |
           cd ${{ matrix.servicios }}
+
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Tests for ${{ matrix.servicios }}
-        run: |
-          cd ${{ matrix.servicios }}
           python manage.py test
