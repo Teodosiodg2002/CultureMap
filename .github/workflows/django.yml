@@ -1,4 +1,4 @@
-name: Django Test
+name: Django CI Test
 
 on:
   push:
@@ -30,12 +30,11 @@ jobs:
 
       - name: Install Dependencies for ${{ matrix.servicios }}
         run: |
+          cd ${{ matrix.servicios }}
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-        working-directory: ${{ matrix.servicios }}
 
       - name: Run Tests for ${{ matrix.servicios }}
         run: |
-          echo "Ejecutando tests en $(pwd)"
+          cd ${{ matrix.servicios }}
           python manage.py test
-        working-directory: ${{ matrix.servicios }}
