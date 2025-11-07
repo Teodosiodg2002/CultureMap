@@ -132,3 +132,59 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     )
 }
+
+# --- CONFIGURACIÓN DE LOGGING  ---
+# Escribimos los logs a la consola (stdout) en formato JSON.
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    
+    # --- Formateadores (Cómo se ve el log) ---
+    'formatters': {
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'format': '%(asctime)s %(name)s %(levelname)s %(message)s %(filename)s %(lineno)d',
+        },
+        'simple': {
+            'format': '[%(asctime)s] %(levelname)s | %(name)s | %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+    },
+    
+    # --- Manejadores (Dónde va el log) ---
+    'handlers': {
+        'console_json': { 
+            'level': 'INFO',
+            'class': 'logging.StreamHandler', # Enviar a stdout (la consola)
+            'formatter': 'json', 
+        },
+        'console_simple': {
+            'level': 'INFO', 
+            'class': 'logging.StreamHandler', 
+            'formatter': 'simple',
+        },
+    },
+    
+    # --- Loggers (Qué módulos registrar) ---
+    'loggers': {
+        # El logger raíz de Django. Capturará errores generales.
+        'django': {
+            'handlers': ['console_simple'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # Logger para peticiones (para ver los GET, POST, etc. en JSON)
+        'django.request': {
+            'handlers': ['console_json'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # El logger raíz de Python (para capturar todo lo demás)
+        '': {
+            'handlers': ['console_simple'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    }
+}
