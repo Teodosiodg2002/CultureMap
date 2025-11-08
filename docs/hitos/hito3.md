@@ -119,4 +119,31 @@ En el siguiente hito, com ya acabo de mencionar, preveo integrar Grafana junto a
 
 ## 🧪 4. Ejecución de Tests
 
-(***Por implementar y comprobar***))
+Para corregir los test y abarcar todos los requisitos de este punto se ha modificado la manera de ralizar los test. En lugar de haber solo uno para toda la aplicacion, cada microservicio, tendrá el suyo propio y será responsable de comprobar su correcto funcionamiento.
+
+Se han implementado 16 test en total:
+
+- **service_usuarios:**
+  - Se comprueba el endpoint de registro (POST /api/register/), incluyendo casos de éxito (201 Created), contraseñas que no coinciden (400 Bad Request) y usuarios duplicados (400 Bad Request).
+  - Se comprueba el endpoint de login (POST /api/token/), validando un login exitoso (200 OK y recepción de tokens) y un login fallido (401 Unauthorized).
+
+- **service_lugares:**
+  - Se comprueba el funcionamiento de la funcion de leer lugares de la base de datos(GET /api/catalogo/lugares/), asegurando que los usuarios anónimos solo vean los lugares aprobados y no los pendientes.
+  - Se comprueban los permisos: un usuario anónimo recibe un 401/403 al intentar crear un lugar (POST), mientras que un usuario autenticado puede hacerlo (201 Created).
+  - Se valida la lógica de perform_create, asegurando que un nuevo lugar se guarda automáticamente con estado="pendiente" y con el creado_por_id correcto del usuario autenticado.
+
+- **service_interacciones:**
+  - Se comprueba que un usuario crea un voto (201 Created) y que, si vuelve a votar, el sistema ejecuta update_or_create y actualiza el voto (200 OK).
+  - Se comprueban los permisos de Comentario, permitiendo la lectura anónima (GET) pero exigiendo autenticación para crear (POST).
+  - Se valida perform_create de comentarios, asegurando que usuario_id y lugar_id se asignan automáticamente desde el token y la URL.
+
+**Integracion continua:**
+
+Se modifica el archivo django-ci.yml para que sea compatible con la nueva arquitectura. Para ello se ha usado un "matriz de estrategia" (strategy: matrix) para ejecutar 4 trabajos en paralelo. Cada uno es responsable de:
+
+1. Hacer cd a la carpeta de su servicio (ej. cd services/service_lugares).
+2. Instalar las dependencias de su requirements.txt específico.
+3. Ejecutar su propia suite de tests (python manage.py test).
+
+![Workflow de CI exitoso en GitHub Actions](../images/CI_correccion_test.png)
+![Detalles CI exitoso en GitHub Actions](../images/detalles_test.png)
