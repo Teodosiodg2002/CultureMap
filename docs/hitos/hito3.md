@@ -99,18 +99,21 @@ Para ello, se ha realizado una pequeña revisión de las principales herramienta
     * **Pros:** Ofrecen una solución completa sin necesidad de mantener servidores o infraestructura.
     * **Contras:** Tienen un coste económico, lo que los hace menos adecuados para este proyecto.
 
-### Decisión Técnica: Log a `stdout` (Preparación para Agregación)
+### Decisión Técnica: Log a `stdout` y a Archivo JSON
 
-En este hito se ha optado por preparar los servicios para poder ser monitorizados, siguiendo una solución sencilla pero escalable.
+Para esta parte del hito he elegido implementar una solución híbrida, haciendo que los logs se muestren por la salida estandar para después en el hito 4, recoger esa información y poder realizar una monitorización. Además, estos logs se quedan recogidos en un archivo dentro del microservicio
 
 * **Implementación:** 
-* Se configurará el módulo logging nativo de Python en el archivo settings.py de cada microservicio (por ejemplo, service_web_frontend, service_lugares, service_usuarios, etc.). De esta forma, los logs se enviarán directamente a la salida estándar (stdout), en lugar de guardarse en archivos .log.
+1.  Se ha instalado la librería `python-json-logger` en cada uno de los 4 servicios.
+2.  Se ha configurado el módulo `logging` en el `settings.py` de cada microservicio, para que como he comentado antes realice dos funciones.
+    1.  Envía un log simple a la **salida estándar (`stdout`)**.
+    2.  Envía un log completo en formato **JSON** a un archivo separado para cada servicio (ej. `services/service_lugares/logs/api.log`).
 
 * **Justificación:** 
-* Este enfoque sigue las recomendaciones del modelo 12-Factor App
-, que sugiere que las aplicaciones no gestionen sus propios archivos de log, sino que simplemente escriban su salida. Así, la gestión del almacenamiento o visualización de logs queda a cargo del sistema que orquesta los servicios (por ejemplo, Docker o Kubernetes).
 
-* **Futuro (Hito 4):** En el siguiente hito, se prevé integrar Grafana junto a Loki y Promtail como sistema de visualización y gestión de logs, aprovechando que los microservicios ya envían su salida de logging a stdout.
+Esta solución crea un sistema de logs que permite comprobar el archivo de log dedicado para cada servicio, facilitando la depuración y el registro de la actividad de la API de forma aislada.
+Además, se prepara el proyecto para el hito 4 formateando la salida por pantalla de los logs. Esto facilita al colector de logs (Promtail) recoger todos los logs de las aplicaciones y mandarlo a Loki, que estará integrado con grafana en el proyecto
+En el siguiente hito, com ya acabo de mencionar, preveo integrar Grafana junto a Loki y Promtail como sistema de visualización y gestión de logs, aprovechando que los microservicios ya envían su salida de logging a stdout.
 
 ---
 
