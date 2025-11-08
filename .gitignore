@@ -96,3 +96,7 @@
 
 # JIRA plugin
 atlassian-ide-plugin.xml
+
+# Archivos de Log
+**/*.log
+**/logs/

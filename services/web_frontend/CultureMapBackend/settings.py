@@ -9,12 +9,14 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+LOGS_DIR = BASE_DIR / 'logs'
+os.makedirs(LOGS_DIR, exist_ok=True)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -132,49 +134,45 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     
-    # --- Formateadores (Cómo se ve el log) ---
+    # --- Formateadores ---
     'formatters': {
-        'json': {
+        'json': { 
             '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
             'format': '%(asctime)s %(name)s %(levelname)s %(message)s %(filename)s %(lineno)d',
         },
-        'simple': {
+        'simple': { 
             'format': '[%(asctime)s] %(levelname)s | %(name)s | %(message)s',
             'datefmt': '%Y-%m-%d %H:%M:%S',
         },
     },
     
-    # --- Manejadores (Dónde va el log) ---
+    # --- Manejadores ---
     'handlers': {
-        'console_json': { 
-            'level': 'INFO',
-            'class': 'logging.StreamHandler', # Enviar a stdout (la consola)
-            'formatter': 'json', 
-        },
-        'console_simple': {
+        'console_simple': { 
             'level': 'INFO', 
             'class': 'logging.StreamHandler', 
             'formatter': 'simple',
         },
+        
+        'file_json': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGS_DIR / 'api.log',
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 2, 
+            'formatter': 'json',
+        },
     },
     
-    # --- Loggers (Qué módulos registrar) ---
+    # --- Loggers ---
     'loggers': {
-        # El logger raíz de Django. Capturará errores generales.
-        'django': {
-            'handlers': ['console_simple'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        # Logger para peticiones (para ver los GET, POST, etc. en JSON)
         'django.request': {
-            'handlers': ['console_json'],
+            'handlers': ['console_simple', 'file_json'],
             'level': 'INFO',
             'propagate': False,
         },
-        # El logger raíz de Python (para capturar todo lo demás)
         '': {
-            'handlers': ['console_simple'],
+            'handlers': ['console_simple', 'file_json'],
             'level': 'INFO',
             'propagate': True,
         },
