@@ -76,8 +76,6 @@ A continuación se describen los servicios principales y su papel dentro del eco
     * **Responsabilidad:** Servirá como punto de entrada único al sistema, actuando como puerta de enlace (gateway) que centraliza las peticiones hacia los demás microservicios.
     * **Estado:** *Diseado, pendiente de implementación.*
 
-*(...Esta sección se rellenará con el código a medida que se implemente...)*
-
 ---
 
 ## 📝 3. Sistema de Logs
