@@ -70,6 +70,19 @@ Actualmente, cuando se visita cualquier ciudad o pueblo, los sitios para ver o l
    - Estudiantes que buscan planes alternativos
 
 ---
+## Arquitectura Cloud
+
+Tras el Hito 3, el proyecto ha pasado de tener una arquitectura monolítica (todo en un mismo sitio) a una arquitectura de microservicios bajo un esquema "Monorepo"(un único repositorio).
+La aplicación se ha separado en servicios independientes, cada uno con su propio proyecto Django y su propia base de datos.
+
+Los servicios implementados actualmente son:
+
+- **services/web_frontend:** El monolito original del Hito 2, que sirve la interfaz de usuario (mapa, plantillas HTML).
+- **services/service_usuarios:** Un microservicio de API (DRF) que gestiona la identidad (registro y login con tokens JWT).
+- **services/service_lugares:** Un microservicio de API (DRF) que gestiona el CRUD del catálogo de lugares.
+- **services/service_interacciones:** Un microservicio de API (DRF) que gestiona la lógica social (votos, comentarios, etc.).
+
+Esta separación es fundamental para el Hito 4, donde cada servicio se desplegará como un contenedor Docker independiente.
 
 ## 📚 Documentación de Hitos
 
@@ -81,9 +94,14 @@ Actualmente, cuando se visita cualquier ciudad o pueblo, los sitios para ver o l
 
 ## 🛠️ Tecnologías
 
-- Django: Python framework
-- GitHub Action
-- Bootstrap
+Este proyecto cuenta con muchas nuevas tecnologías:
+
+- **Backend y API:** Django y Django REST Framework (DRF).
+- **Autenticación de API:** Simple JWT (JSON Web Tokens).
+- **Frontend:** Plantillas de Django (HTML) con Bootstrap 5.
+- **Mapas:** Leaflet.js.
+- **Logging:** python-json-logger (para logs estructurados a stdout).
+- **CI/CD:** GitHub Actions (testeando 4 servicios en paralelo).
 
 ---
 
@@ -110,4 +128,4 @@ Proyecto desarrollado como parte de la asignatura de **Cloud Computing** del Má
 
 ---
 
-_Última actualización: [6/10/2025]_
+_Última actualización: [10/11/2025]_
