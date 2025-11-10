@@ -14,7 +14,6 @@
 - [Público Objetivo](#-público-objetivo)
 - [Arquitectura Cloud](#️-arquitectura-cloud)
 - [Documentación de Hitos](#-documentación-de-hitos)
-- [Tecnologías](#-tecnologías)
 - [Autor](#-autor)
 
 ---
