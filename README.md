@@ -8,7 +8,6 @@
 ---
 
 ## 📖 Índice
-
 - [Descripción del Proyecto](#-descripción-del-proyecto)
 - [Problema que Resuelve](#-problema-que-resuelve)
 - [Público Objetivo](#-público-objetivo)
