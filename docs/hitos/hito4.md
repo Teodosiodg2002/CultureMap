@@ -10,7 +10,7 @@ Esto implica "dockerizar" cada servicio (creando un `Dockerfile`) y orquestar el
 
 ## 🔧 1. Justificación de la Infraestructura del Clúster
 
-### 1.1. Contenedor de Base de Datos: PostgreSQL (Tu Idea 1)
+### 1.1. Contenedor de Base de Datos: PostgreSQL
 
 En el Hito 3, cada servicio usaba su propia base de datos `db.sqlite3`. Para un entorno de producción y de contenedores real, esta solución no es viable.
 
@@ -53,7 +53,7 @@ Se ha elegido `python:3.12-slim-bookworm` como imagen base para todos los servic
 
 ---
 
-## 🛡️ 3. Implementación de Lógica de Negocio (Roles) (Tu Idea 2)
+## 🛡️ 3. Implementación de Lógica de Negocio (Roles)
 
 Para cumplir con la visión de la aplicación, se implementará un sistema de roles.
 
@@ -62,7 +62,7 @@ Para cumplir con la visión de la aplicación, se implementará un sistema de ro
 
 ---
 
-## 🗓️ 4. Implementación del `service_eventos` (Tu Idea 3)
+## 🗓️ 4. Implementación del `service_eventos`
 
 Para completar la funcionalidad de la plataforma, se creará el microservicio `service_eventos`, separado de `service_lugares`.
 
@@ -71,7 +71,7 @@ Para completar la funcionalidad de la plataforma, se creará el microservicio `s
 
 ---
 
-## 🌐 5. Interconexión del Frontend (Tu Idea 4)
+## 🌐 5. Interconexión del Frontend
 
 Un objetivo clave de este hito es que la aplicación **funcione de manera interconectada**. El `service_web_frontend` será refactorizado para actuar como un cliente de las APIs de *backend*.
 
@@ -85,7 +85,7 @@ Un objetivo clave de este hito es que la aplicación **funcione de manera interc
 
 ---
 
-## 📝 7. Implementación del Servicio de Logs (Tu Idea)
+## 📝 7. Implementación del Servicio de Logs
 
 Para cumplir con el requisito de un "servicio de logs separado" y dar visibilidad al clúster, se implementará un stack de agregación de logs.
 
