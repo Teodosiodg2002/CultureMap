@@ -1,0 +1,38 @@
+version: '3.9'
+
+networks:
+  culturemap_network:
+    driver: bridge
+
+volumes:
+  postgres_usuarios_data:
+
+services:
+
+  # --- SERVICIO DE USUARIOS ---
+  service_usuarios:
+    build:
+      context: ./services/service_usuarios
+    command: gunicorn service_usuarios.wsgi:application --bind 0.0.0.0:8000
+    ports:
+      - "8001:8000"
+    env_file:
+      - ./services/service_usuarios/.env
+    networks:
+      - culturemap_network
+    depends_on:
+      - db_usuarios
+
+  # --- BASE DE DATOS DE USUARIOS ---
+  db_usuarios:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_usuarios_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      - culturemap_network
+
+
