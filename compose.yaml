@@ -31,10 +31,7 @@ services:
     image: postgres:16-alpine
     volumes:
       - postgres_frontend_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    # BORRADO: environment
     env_file:
       - ./services/web_frontend/.env
     networks:
@@ -60,10 +57,7 @@ services:
     image: postgres:16-alpine
     volumes:
       - postgres_usuarios_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    # BORRADO: environment
     env_file:
       - ./services/service_usuarios/.env
     networks:
@@ -89,10 +83,7 @@ services:
     image: postgres:16-alpine
     volumes:
       - postgres_lugares_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    # BORRADO: environment
     env_file:
       - ./services/service_lugares/.env
     networks:
@@ -118,10 +109,7 @@ services:
     image: postgres:16-alpine
     volumes:
       - postgres_interacciones_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    # BORRADO: environment
     env_file:
       - ./services/service_interacciones/.env
     networks:
