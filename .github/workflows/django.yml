@@ -15,6 +15,7 @@ jobs:
           - 'services/service_usuarios'
           - 'services/service_lugares'
           - 'services/service_interacciones'
+          - 'services/service_eventos'
       fail-fast: false
 
     runs-on: ubuntu-latest
