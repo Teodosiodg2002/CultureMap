@@ -1,0 +1,116 @@
+version: '3.9'
+
+networks:
+  culturemap_network:
+    driver: bridge
+
+volumes:
+  postgres_frontend_data:
+  postgres_usuarios_data:
+  postgres_lugares_data:
+  postgres_interacciones_data:
+
+services:
+  # ==============================================================================
+  # 1. SERVICIO WEB FRONTEND (Puerto 8000)
+  # ==============================================================================
+  web_frontend:
+    build:
+      context: ./services/web_frontend
+    command: gunicorn CultureMapBackend.wsgi:application --bind 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./services/web_frontend/.env
+    networks:
+      - culturemap_network
+    depends_on:
+      - db_web_frontend
+
+  db_web_frontend:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_frontend_data:/var/lib/postgresql/data
+    # BORRADO: environment
+    env_file:
+      - ./services/web_frontend/.env
+    networks:
+      - culturemap_network
+
+  # ==============================================================================
+  # 2. SERVICIO DE USUARIOS (Puerto 8001)
+  # ==============================================================================
+  service_usuarios:
+    build:
+      context: ./services/service_usuarios
+    command: gunicorn service_usuarios.wsgi:application --bind 0.0.0.0:8000
+    ports:
+      - "8001:8000"
+    env_file:
+      - ./services/service_usuarios/.env
+    networks:
+      - culturemap_network
+    depends_on:
+      - db_usuarios
+
+  db_usuarios:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_usuarios_data:/var/lib/postgresql/data
+    # BORRADO: environment
+    env_file:
+      - ./services/service_usuarios/.env
+    networks:
+      - culturemap_network
+
+  # ==============================================================================
+  # 3. SERVICIO DE LUGARES (Puerto 8002)
+  # ==============================================================================
+  service_lugares:
+    build:
+      context: ./services/service_lugares
+    command: gunicorn service_lugares.wsgi:application --bind 0.0.0.0:8000
+    ports:
+      - "8002:8000"
+    env_file:
+      - ./services/service_lugares/.env
+    networks:
+      - culturemap_network
+    depends_on:
+      - db_lugares
+
+  db_lugares:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_lugares_data:/var/lib/postgresql/data
+    # BORRADO: environment
+    env_file:
+      - ./services/service_lugares/.env
+    networks:
+      - culturemap_network
+
+  # ==============================================================================
+  # 4. SERVICIO DE INTERACCIONES (Puerto 8003)
+  # ==============================================================================
+  service_interacciones:
+    build:
+      context: ./services/service_interacciones
+    command: gunicorn service_interacciones.wsgi:application --bind 0.0.0.0:8000
+    ports:
+      - "8003:8000"
+    env_file:
+      - ./services/service_interacciones/.env
+    networks:
+      - culturemap_network
+    depends_on:
+      - db_interacciones
+
+  db_interacciones:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_interacciones_data:/var/lib/postgresql/data
+    # BORRADO: environment
+    env_file:
+      - ./services/service_interacciones/.env
+    networks:
+      - culturemap_network
