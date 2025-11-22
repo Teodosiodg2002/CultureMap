@@ -1,7 +1,10 @@
 from django.shortcuts import render
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from .models import Lugar, EstadoAprobacion
 from .serializers import LugarSerializer
+from .permissions import IsOrganizadorOrAdmin
 
 class LugarViewSet(viewsets.ModelViewSet):
     """
@@ -31,3 +34,20 @@ class LugarViewSet(viewsets.ModelViewSet):
             creado_por_id=self.request.user.id,
             estado=EstadoAprobacion.PENDIENTE
         )
+        
+    @action(detail=True, methods=['put'], permission_classes=[IsOrganizadorOrAdmin])
+    def aprobar(self, request, pk=None):
+        """
+        Endpoint para que un Organizador apruebe un lugar.
+        Ruta: PUT /api/catalogo/lugares/{pk}/aprobar/
+        """
+        try:
+            lugar = Lugar.objects.get(pk=pk)
+        except Lugar.DoesNotExist:
+            return Response({'error': 'Lugar no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Cambiamos el estado
+        lugar.estado = EstadoAprobacion.APROBADO
+        lugar.save()
+
+        return Response({'status': 'Lugar aprobado correctamente'}, status=status.HTTP_200_OK)
