@@ -9,6 +9,7 @@ volumes:
   postgres_usuarios_data:
   postgres_lugares_data:
   postgres_interacciones_data:
+  postgres_eventos_data:
 
 services:
   # ==============================================================================
@@ -112,5 +113,31 @@ services:
     # BORRADO: environment
     env_file:
       - ./services/service_interacciones/.env
+    networks:
+      - culturemap_network
+
+  # ==============================================================================
+  # 5. SERVICIO DE EVENTOS (Puerto 8004)
+  # ==============================================================================
+  service_eventos:
+    build:
+      context: ./services/service_eventos
+    command: gunicorn service_eventos.wsgi:application --bind 0.0.0.0:8000
+    ports:
+      - "8004:8000" # Usaremos el puerto 8004 para eventos
+    env_file:
+      - ./services/service_eventos/.env
+    networks:
+      - culturemap_network
+    depends_on:
+      - db_eventos
+
+  db_eventos:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_eventos_data:/var/lib/postgresql/data
+    # Sin 'environment', usamos env_file como arreglamos antes
+    env_file:
+      - ./services/service_eventos/.env
     networks:
       - culturemap_network
