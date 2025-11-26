@@ -22,9 +22,8 @@ os.makedirs(LOGS_DIR, exist_ok=True)
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-dev-key')
-DEBUG = os.environ.get('DEBUG') == '1'
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
-
+DEBUG = 1
+ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
@@ -177,3 +176,8 @@ LOGGING = {
         },
     }
 }
+
+API_USUARIOS_URL = os.environ.get('API_USUARIOS_URL', 'http://service-usuarios:8000/api')
+API_LUGARES_URL = os.environ.get('API_LUGARES_URL', 'http://service-lugares:8000/api/catalogo')
+API_INTERACCIONES_URL = os.environ.get('API_INTERACCIONES_URL', 'http://service-interacciones:8000/api/interacciones')
+API_EVENTOS_URL = os.environ.get('API_EVENTOS_URL', 'http://service-eventos:8000/api')

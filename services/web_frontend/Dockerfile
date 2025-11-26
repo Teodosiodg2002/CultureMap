@@ -18,7 +18,8 @@ COPY requirements.txt .
 
 RUN python -m pip install --upgrade pip
 RUN python -m pip install gunicorn psycopg2-binary
-RUN python -m pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install gevent
 
 # 6. Copiar el código del proyecto
 COPY . .
@@ -27,4 +28,7 @@ COPY . .
 EXPOSE 8000
 
 # 8. Comando de Ejecución
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "CultureMapBackend.wsgi:application"]
+CMD ["gunicorn", "CultureMapBackend.wsgi:application", \
+     "--bind", "0.0.0.0:8000", \
+     "--timeout", "300", \
+     "--log-level", "debug"]

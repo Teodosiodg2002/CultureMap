@@ -26,12 +26,8 @@ LOGS_DIR.mkdir(exist_ok=True)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-eventos')
 DEBUG = os.environ.get('DEBUG') == '1'
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-
-# SECURITY WARNING: don't run with debug turned on in production!
+ALLOWED_HOSTS = ['*']
 DEBUG = True
-
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -58,6 +54,15 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'service_eventos.urls'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'eventos.authentication.StatelessJWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    )
+}
 
 TEMPLATES = [
     {

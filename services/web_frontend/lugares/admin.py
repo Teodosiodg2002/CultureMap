@@ -1,4 +1,4 @@
+# services/web_frontend/lugares/admin.py
 from django.contrib import admin
-from .models import Lugar  # Importa tu modelo Lugar
 
-admin.site.register(Lugar)
+# Ya no registramos modelos aquí porque este servicio es solo frontend.

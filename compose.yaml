@@ -15,24 +15,33 @@ services:
   # ==============================================================================
   # 1. SERVICIO WEB FRONTEND (Puerto 8000)
   # ==============================================================================
-  web_frontend:
+  web-frontend:  # 
+    container_name: web-frontend 
     build:
       context: ./services/web_frontend
-    command: gunicorn CultureMapBackend.wsgi:application --bind 0.0.0.0:8000
+    command: >
+      gunicorn CultureMapBackend.wsgi:application
+      --bind 0.0.0.0:8000
+      --worker-class gevent
+      --workers 2
+      --timeout 120
+      --log-level debug    
     ports:
       - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
     env_file:
       - ./services/web_frontend/.env
     networks:
       - culturemap_network
     depends_on:
-      - db_web_frontend
+      - db-web-frontend # 
 
-  db_web_frontend:
+  db-web-frontend: # 
+    container_name: db-web-frontend
     image: postgres:16-alpine
     volumes:
       - postgres_frontend_data:/var/lib/postgresql/data
-    # BORRADO: environment
     env_file:
       - ./services/web_frontend/.env
     networks:
@@ -41,7 +50,8 @@ services:
   # ==============================================================================
   # 2. SERVICIO DE USUARIOS (Puerto 8001)
   # ==============================================================================
-  service_usuarios:
+  service-usuarios: # 
+    container_name: service-usuarios
     build:
       context: ./services/service_usuarios
     command: gunicorn service_usuarios.wsgi:application --bind 0.0.0.0:8000
@@ -52,13 +62,13 @@ services:
     networks:
       - culturemap_network
     depends_on:
-      - db_usuarios
+      - db-usuarios # 
 
-  db_usuarios:
+  db-usuarios: # 
+    container_name: db-usuarios
     image: postgres:16-alpine
     volumes:
       - postgres_usuarios_data:/var/lib/postgresql/data
-    # BORRADO: environment
     env_file:
       - ./services/service_usuarios/.env
     networks:
@@ -67,7 +77,8 @@ services:
   # ==============================================================================
   # 3. SERVICIO DE LUGARES (Puerto 8002)
   # ==============================================================================
-  service_lugares:
+  service-lugares: # 
+    container_name: service-lugares
     build:
       context: ./services/service_lugares
     command: gunicorn service_lugares.wsgi:application --bind 0.0.0.0:8000
@@ -78,13 +89,13 @@ services:
     networks:
       - culturemap_network
     depends_on:
-      - db_lugares
+      - db-lugares # 
 
-  db_lugares:
+  db-lugares: # 
+    container_name: db-lugares
     image: postgres:16-alpine
     volumes:
       - postgres_lugares_data:/var/lib/postgresql/data
-    # BORRADO: environment
     env_file:
       - ./services/service_lugares/.env
     networks:
@@ -93,7 +104,8 @@ services:
   # ==============================================================================
   # 4. SERVICIO DE INTERACCIONES (Puerto 8003)
   # ==============================================================================
-  service_interacciones:
+  service-interacciones: # 
+    container_name: service-interacciones
     build:
       context: ./services/service_interacciones
     command: gunicorn service_interacciones.wsgi:application --bind 0.0.0.0:8000
@@ -104,13 +116,13 @@ services:
     networks:
       - culturemap_network
     depends_on:
-      - db_interacciones
+      - db-interacciones # 
 
-  db_interacciones:
+  db-interacciones: # 
+    container_name: db-interacciones
     image: postgres:16-alpine
     volumes:
       - postgres_interacciones_data:/var/lib/postgresql/data
-    # BORRADO: environment
     env_file:
       - ./services/service_interacciones/.env
     networks:
@@ -119,24 +131,25 @@ services:
   # ==============================================================================
   # 5. SERVICIO DE EVENTOS (Puerto 8004)
   # ==============================================================================
-  service_eventos:
+  service-eventos: 
+    container_name: service-eventos
     build:
       context: ./services/service_eventos
     command: gunicorn service_eventos.wsgi:application --bind 0.0.0.0:8000
     ports:
-      - "8004:8000" # Usaremos el puerto 8004 para eventos
+      - "8004:8000"
     env_file:
       - ./services/service_eventos/.env
     networks:
       - culturemap_network
     depends_on:
-      - db_eventos
+      - db-eventos # 
 
-  db_eventos:
+  db-eventos: # 
+    container_name: db-eventos
     image: postgres:16-alpine
     volumes:
       - postgres_eventos_data:/var/lib/postgresql/data
-    # Sin 'environment', usamos env_file como arreglamos antes
     env_file:
       - ./services/service_eventos/.env
     networks:
