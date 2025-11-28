@@ -5,121 +5,170 @@
 {% block content %}
 
 <style>
-    /* Truco CSS: Cambia el color del marcador rotando el tono (Hue) */
-    /* 140deg convierte el azul en rojo/rosado */
-    img.icono-evento { filter: hue-rotate(140deg); }
-    /* 280deg convierte el azul en verde (opcional) */
-    /* img.icono-otro { filter: hue-rotate(280deg); } */
+  /* Truco CSS: Cambia el color del marcador rotando el tono (Hue) */
+  /* 140deg convierte el azul en rojo/rosado */
+  img.icono-evento {
+    filter: hue-rotate(140deg);
+  }
 </style>
 
-<div class="container-fluid">
-    <div class="row mb-3">
-        <div class="col-md-8">
-            <h1>Explora Granada</h1>
-            <p>
-                <span style="color: #2c82e0;">🔵 <b>Lugares</b></span> &nbsp;|&nbsp; 
-                <span style="color: #e0462c;">🔴 <b>Eventos</b></span>
+<div class="container-fluid py-4">
+  
+  <div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+      <h1 class="display-5 fw-bold">Explora Granada</h1>
+      <p class="lead text-muted">
+        <span style="color: #2c82e0">🔵 <b>Lugares</b></span> &nbsp;|&nbsp;
+        <span style="color: #e0462c">🔴 <b>Eventos</b></span>
+      </p>
+    </div>
+  </div>
+
+  {% if error %}
+  <div class="alert alert-warning shadow-sm mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
+  </div>
+  {% endif %}
+
+  <div class="row mb-5">
+    <div class="col-12">
+      <div
+        id="map"
+        class="shadow border"
+        style="height: 500px; border-radius: 12px; overflow: hidden;"
+      ></div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-bottom border-primary border-3">
+           <h3 class="text-primary mb-0"><i class="bi bi-bank2"></i> Lugares Destacados</h3>
+        </div>
+        <div class="list-group list-group-flush">
+        {% for lugar in lugares %}
+          <a
+            href="{% url 'detalle_lugar' lugar.id %}"
+            class="list-group-item list-group-item-action p-3"
+          >
+            <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+              <h5 class="mb-0 text-primary">{{ lugar.nombre }}</h5>
+              <span class="badge bg-info text-dark rounded-pill">{{ lugar.categoria }}</span>
+            </div>
+            <p class="mb-1 text-secondary">{{ lugar.descripcion|truncatewords:15 }}</p>
+          </a>
+        {% empty %}
+          <div class="list-group-item text-center text-muted py-4">
+            No hay lugares disponibles en este momento.
+          </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-bottom border-danger border-3">
+           <h3 class="text-danger mb-0"><i class="bi bi-calendar-event"></i> Próximos Eventos</h3>
+        </div>
+        <div class="list-group list-group-flush">
+        {% for evento in eventos %}
+          <div class="list-group-item list-group-item-action p-3">
+            <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+              <h5 class="mb-0 text-danger">{{ evento.nombre }}</h5>
+              <span class="badge bg-danger rounded-pill">
+                {{ evento.fecha_inicio|slice:":10" }}
+              </span>
+            </div>
+            <p class="mb-1 text-secondary">{{ evento.descripcion|truncatewords:15 }}</p>
+            <small class="text-muted"><i class="bi bi-geo-alt-fill text-danger"></i> Ver en el mapa (Pin Rojo)</small>
+          </div>
+        {% empty %}
+          <div class="list-group-item text-center text-muted py-4">
+            No hay eventos próximos programados.
+          </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  {% if request.session.rol == 'admin' or request.session.rol == 'organizador' %}
+  <div class="row mt-5 mb-5">
+    <div class="col-12">
+      <div class="card bg-dark text-white p-4 shadow text-center" style="border-radius: 15px;">
+        <div class="card-body">
+            <h3 class="card-title text-warning"><i class="bi bi-gear-fill"></i> Zona de Gestión</h3>
+            <p class="card-text">
+              Tienes permisos especiales para gestionar el contenido de la plataforma.
             </p>
+            <a href="{% url 'dashboard' %}" class="btn btn-warning btn-lg fw-bold px-5 rounded-pill">
+              <i class="bi bi-speedometer2"></i> Ir al Panel de Administración
+            </a>
         </div>
+      </div>
     </div>
+  </div>
+  {% endif %}
 
-    {% if error %}
-        <div class="alert alert-warning">{{ error }}</div>
-    {% endif %}
-
-    <div class="row mb-5">
-        <div class="col-12">
-            <div id="map" class="shadow-sm border" style="height: 500px; border-radius: 10px;"></div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-            <h3 class="text-primary border-bottom pb-2">🏛️ Lugares Destacados</h3>
-            <div class="list-group">
-                {% for lugar in lugares %}
-                    <a href="{% url 'detalle_lugar' lugar.id %}" class="list-group-item list-group-item-action">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">{{ lugar.nombre }}</h5>
-                            <small class="text-muted">{{ lugar.categoria }}</small>
-                        </div>
-                        <p class="mb-1">{{ lugar.descripcion|truncatewords:15 }}</p>
-                    </a>
-                {% empty %}
-                    <div class="alert alert-light">No hay lugares disponibles.</div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <h3 class="text-danger border-bottom pb-2">📅 Próximos Eventos</h3>
-            <div class="list-group">
-                {% for evento in eventos %}
-                    <div class="list-group-item list-group-item-action flex-column align-items-start">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">{{ evento.nombre }}</h5>
-                            <small class="text-danger">
-                                {{ evento.fecha_inicio|slice:":10" }} </small>
-                        </div>
-                        <p class="mb-1">{{ evento.descripcion|truncatewords:15 }}</p>
-                        <small class="text-muted">📍 Ver en el mapa (Pin Rojo)</small>
-                    </div>
-                {% empty %}
-                    <div class="alert alert-light">No hay eventos próximos.</div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
 </div>
 
-{% endblock %}
+{% endblock %} 
 
 {% block scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        
-        // 1. Inicializar mapa centrado en Granada
-        var map = L.map('map').setView([37.1773, -3.5986], 13);
+  document.addEventListener('DOMContentLoaded', function () {
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+      // 1. Inicializar mapa centrado en Granada
+      var map = L.map('map').setView([37.1773, -3.5986], 13);
 
-        // 2. Definir el Icono ROJO (para eventos)
-        var redIcon = new L.Icon({
-            iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-            shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41],
-            className: 'icono-evento' // <--- Esta clase aplica el filtro de color rojo
-        });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
 
-        // 3. Pintar LUGARES (Azul por defecto)
-        {% for lugar in lugares %}
-            {% if lugar.lat and lugar.lng %}
-                L.marker([{{ lugar.lat }}, {{ lugar.lng }}])
-                 .addTo(map)
-                 .bindPopup(`
-                    <b>🏛️ <a href="{% url 'detalle_lugar' lugar.id %}">{{ lugar.nombre|escapejs }}</a></b><br>
-                    ${"{{ lugar.descripcion|escapejs }}".substring(0, 50)}...
-                 `);
-            {% endif %}
-        {% endfor %}
+      // 2. Definir el Icono ROJO (para eventos)
+      var redIcon = new L.Icon({
+          iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+          shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41],
+          className: 'icono-evento' // <--- Esta clase aplica el filtro de color rojo
+      });
 
-        // 4. Pintar EVENTOS (Rojo)
-        {% for evento in eventos %}
-            {% if evento.lat and evento.lng %}
-                L.marker([{{ evento.lat }}, {{ evento.lng }}], {icon: redIcon})
-                 .addTo(map)
-                 .bindPopup(`
-                    <b>📅 {{ evento.nombre|escapejs }}</b><br>
-                    Fecha: {{ evento.fecha_inicio|slice:":10" }}<br>
-                    ${"{{ evento.descripcion|escapejs }}".substring(0, 50)}...
-                 `);
-            {% endif %}
-        {% endfor %}
-    });
+      // 3. Pintar LUGARES (Azul por defecto)
+      {% for lugar in lugares %}
+          {% if lugar.lat and lugar.lng %}
+              L.marker([{{ lugar.lat }}, {{ lugar.lng }}])
+               .addTo(map)
+               .bindPopup(`
+                 <div class="text-center">
+                    <h6 class="text-primary mb-1">🏛️ <a href="{% url 'detalle_lugar' lugar.id %}" class="text-decoration-none">{{ lugar.nombre|escapejs }}</a></h6>
+                    <span class="badge bg-info text-dark">{{ lugar.categoria|escapejs }}</span><br>
+                    <small class="text-muted">${"{{ lugar.descripcion|escapejs }}".substring(0, 50)}...</small>
+                 </div>
+               `);
+          {% endif %}
+      {% endfor %}
+
+      // 4. Pintar EVENTOS (Rojo)
+      {% for evento in eventos %}
+          {% if evento.lat and evento.lng %}
+              L.marker([{{ evento.lat }}, {{ evento.lng }}], {icon: redIcon})
+               .addTo(map)
+               .bindPopup(`
+                 <div class="text-center">
+                    <h6 class="text-danger mb-1">📅 {{ evento.nombre|escapejs }}</h6>
+                    <span class="badge bg-danger">{{ evento.fecha_inicio|slice:":10" }}</span><br>
+                    <small class="text-muted">${"{{ evento.descripcion|escapejs }}".substring(0, 50)}...</small>
+                 </div>
+               `);
+          {% endif %}
+      {% endfor %}
+  });
 </script>
 {% endblock %}

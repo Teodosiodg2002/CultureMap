@@ -34,20 +34,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     
     def validate(self, attrs):
-        username = attrs.get("username")
-        password = attrs.get("password")
-        
-        print(f"🔍 [BACKEND] Validando credenciales para: '{username}'")
-        # NO imprimas la contraseña real por seguridad, pero sí su longitud o hash
-        print(f"🔍 [BACKEND] Password recibido (longitud): {len(password)}")
-
-        try:
-            data = super().validate(attrs)
-            print(f"✅ [BACKEND] Validación EXITOSA para {username}")
-            return data
-        except Exception as e:
-            print(f"❌ [BACKEND] Validación FALLIDA para {username}. Razón: {e}")
-            raise e
+        data = super().validate(attrs)
+        data['username'] = self.user.username
+        data['rol'] = self.user.rol
+        return data
     
     @classmethod
     def get_token(cls, user):
@@ -55,3 +45,9 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['username'] = user.username
         token['rol'] = user.rol
         return token
+    
+class UserManagementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'rol', 'is_active', 'date_joined')
+        read_only_fields = ('username', 'email', 'date_joined')
