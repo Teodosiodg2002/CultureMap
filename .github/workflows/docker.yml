@@ -1,0 +1,51 @@
+name: 2. Publicar Docker Images
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_run:
+    workflows: ["1. Pasar Tests"]
+    types:
+      - completed
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  push_to_registry:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }} 
+    
+    strategy:
+      matrix:
+        include:
+          - context: 'services/web_frontend'
+            image: 'web-frontend'
+          - context: 'services/service_usuarios'
+            image: 'service-usuarios'
+          - context: 'services/service_lugares'
+            image: 'service-lugares'
+          - context: 'services/service_interacciones'
+            image: 'service-interacciones'
+          - context: 'services/service_eventos'
+            image: 'service-eventos'
+
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Login en GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Construir y Subir (Push)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.context }}/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:latest
