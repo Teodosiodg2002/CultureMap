@@ -1,56 +1,51 @@
 {% extends 'lugares/base.html' %}
-
-{% block title %}Proponer Nuevo Lugar{% endblock %}
+{% block title %}Publicar Evento{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <div class="card shadow">
-            <div class="card-header bg-success text-white">
-                <h4 class="mb-0">📍 Proponer un nuevo Lugar</h4>
+        <div class="card shadow border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">📅 Publicar Nuevo Evento</h4>
             </div>
             <div class="card-body">
-                
-                {% if error %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                {% endif %}
+                {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
 
                 <form method="post">
                     {% csrf_token %}
-                    
                     <div class="mb-3">
-                        <label class="form-label">Nombre del Lugar</label>
+                        <label class="form-label">Nombre del Evento</label>
                         <input type="text" name="nombre" class="form-control" required>
                     </div>
-
+                    <div class="mb-3">
+                        <label class="form-label">Fecha y Hora de Inicio</label>
+                        <input type="datetime-local" name="fecha_inicio" class="form-control" required>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">Descripción</label>
                         <textarea name="descripcion" class="form-control" rows="3" required></textarea>
                     </div>
-
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Latitud</label>
-                            <input type="number" step="any" name="lat" class="form-control" placeholder="Ej: 37.17" required>
+                            <input type="number" step="any" name="lat" class="form-control" placeholder="37.17" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Longitud</label>
-                            <input type="number" step="any" name="lng" class="form-control" placeholder="Ej: -3.59" required>
+                            <input type="number" step="any" name="lng" class="form-control" placeholder="-3.59" required>
                         </div>
                     </div>
-
                     <div class="mb-3">
                         <label class="form-label">Categoría</label>
                         <select name="categoria" class="form-select">
+                            <option value="concierto">Concierto</option>
+                            <option value="teatro">Teatro</option>
+                            <option value="exposicion">Exposición</option>
+                            <option value="fiesta">Fiesta</option>
                             <option value="otros">Otros</option>
-                            <option value="mirador">Mirador</option>
-                            <option value="bar">Bar</option>
-                            <option value="plaza">Plaza</option>
-                            <option value="monumento">Monumento</option>
                         </select>
                     </div>
-
-                    <button type="submit" class="btn btn-success w-100">Enviar Propuesta</button>
+                    <button type="submit" class="btn btn-danger w-100">Publicar Evento</button>
                 </form>
             </div>
         </div>

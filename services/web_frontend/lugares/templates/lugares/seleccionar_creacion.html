@@ -1,0 +1,33 @@
+{% extends 'lugares/base.html' %}
+{% block title %}Publicar Contenido{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 text-center">
+        <h2 class="mb-5">¿Qué quieres compartir con la comunidad?</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card h-100 border-primary shadow-sm hover-card">
+                    <div class="card-body py-5">
+                        <h1 class="display-1 text-primary"><i class="bi bi-geo-alt-fill"></i></h1>
+                        <h3>Un Lugar</h3>
+                        <p class="text-muted">Un sitio permanente como un mirador, tienda, bar o monumento.</p>
+                        <a href="{% url 'crear_lugar' %}" class="btn btn-primary btn-lg mt-3">Crear Lugar</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100 border-danger shadow-sm hover-card">
+                    <div class="card-body py-5">
+                        <h1 class="display-1 text-danger"><i class="bi bi-calendar-event-fill"></i></h1>
+                        <h3>Un Evento</h3>
+                        <p class="text-muted">Algo temporal como un concierto, exposición o fiesta con fecha.</p>
+                        <a href="{% url 'crear_evento' %}" class="btn btn-danger btn-lg mt-3">Crear Evento</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

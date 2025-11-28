@@ -213,3 +213,46 @@ def index_eventos(request):
         error = "No se pudo conectar con el servicio de eventos."
 
     return render(request, 'lugares/index_eventos.html', {'eventos': eventos, 'error': error})
+
+def logout_view(request):
+    request.session.flush() # Borra cookies y sesión
+    return redirect('index_lugares')
+
+def seleccionar_creacion(request):
+    """Página intermedia para elegir qué crear."""
+    # Verificar si está logueado
+    if not request.session.get('access_token'):
+        return redirect('login')
+        
+    return render(request, 'lugares/seleccionar_creacion.html')
+
+# --- VISTA: CREAR EVENTO ---
+def crear_evento(request):
+    if request.method == 'GET':
+        if not request.session.get('access_token'):
+            return redirect('login')
+        return render(request, 'lugares/crear_evento.html')
+    
+    if request.method == 'POST':
+        token = request.session.get('access_token')
+        headers = {'Authorization': f'Bearer {token}'}
+        
+        data = {
+            'nombre': request.POST.get('nombre'),
+            'descripcion': request.POST.get('descripcion'),
+            'fecha_inicio': request.POST.get('fecha_inicio'),
+            'lat': request.POST.get('lat'),
+            'lng': request.POST.get('lng'),
+            'categoria': request.POST.get('categoria'),
+        }
+        
+        try:
+            response = requests.post(f"{settings.API_EVENTOS_URL}/eventos/", json=data, headers=headers)
+            
+            if response.status_code == 201:
+                return redirect('index_lugares')
+            else:
+                return render(request, 'lugares/crear_evento.html', {'error': f"Error API: {response.text}"})
+                
+        except requests.exceptions.RequestException:
+            return render(request, 'lugares/crear_evento.html', {'error': "Error de conexión con el servicio de eventos"})

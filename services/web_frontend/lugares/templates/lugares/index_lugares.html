@@ -21,13 +21,6 @@
                 <span style="color: #e0462c;">🔴 <b>Eventos</b></span>
             </p>
         </div>
-        <div class="col-md-4 text-end align-self-center">
-            {% if request.session.access_token %}
-                <a href="{% url 'crear_lugar' %}" class="btn btn-success">
-                    <i class="bi bi-plus-circle"></i> Proponer Sitio
-                </a>
-            {% endif %}
-        </div>
     </div>
 
     {% if error %}
