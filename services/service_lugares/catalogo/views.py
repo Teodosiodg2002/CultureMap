@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -7,47 +6,41 @@ from .serializers import LugarSerializer
 from .permissions import IsOrganizadorOrAdmin
 
 class LugarViewSet(viewsets.ModelViewSet):
-    """
-    Este ViewSet proporciona automáticamente las acciones
-    `list` (listar), `create` (crear), `retrieve` (detalle),
-    `update` (actualizar) y `destroy` (borrar) para el modelo Lugar.
-    """
-
     serializer_class = LugarSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        """
-        Esta función define qué lugares se devuelven.
-        """
-        return Lugar.objects.filter(
-            estado=EstadoAprobacion.APROBADO,
-            publicado=True
-        ).order_by('-creado_en')
+        user = self.request.user
+        rol = getattr(user, 'rol', None)
+        
+        if user.is_authenticated and rol in ['admin', 'organizador']:
+            return Lugar.objects.all().order_by('-creado_en')
+        
+        return Lugar.objects.filter(estado=EstadoAprobacion.APROBADO, publicado=True).order_by('-creado_en')
 
     def perform_create(self, serializer):
-        """
-        Sobreescribimos este método para asignar automáticamente el 'creado_por_id'
-        y el 'estado' al crear un nuevo lugar a través de la API.
-        """
+        usuario_id = 1
+        if self.request.user and self.request.user.is_authenticated:
+            usuario_id = self.request.user.id
+            
         serializer.save(
-            creado_por_id=self.request.user.id,
+            creado_por_id=usuario_id,
             estado=EstadoAprobacion.PENDIENTE
         )
-        
+
+    # --- ACCIONES DE MODERACIÓN ---
     @action(detail=True, methods=['put'], permission_classes=[IsOrganizadorOrAdmin])
     def aprobar(self, request, pk=None):
-        """
-        Endpoint para que un Organizador apruebe un lugar.
-        Ruta: PUT /api/catalogo/lugares/{pk}/aprobar/
-        """
-        try:
-            lugar = Lugar.objects.get(pk=pk)
-        except Lugar.DoesNotExist:
-            return Response({'error': 'Lugar no encontrado'}, status=status.HTTP_404_NOT_FOUND)
-
-        # Cambiamos el estado
+        lugar = self.get_object()
         lugar.estado = EstadoAprobacion.APROBADO
+        lugar.publicado = True
         lugar.save()
+        return Response({'status': 'Lugar aprobado'})
 
-        return Response({'status': 'Lugar aprobado correctamente'}, status=status.HTTP_200_OK)
+    @action(detail=True, methods=['put'], permission_classes=[IsOrganizadorOrAdmin])
+    def rechazar(self, request, pk=None):
+        lugar = self.get_object()
+        lugar.estado = EstadoAprobacion.RECHAZADO
+        lugar.publicado = False
+        lugar.save()
+        return Response({'status': 'Lugar rechazado'})

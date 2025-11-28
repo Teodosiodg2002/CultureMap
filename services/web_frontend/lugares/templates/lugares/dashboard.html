@@ -1,0 +1,281 @@
+{% extends 'lugares/base.html' %}
+
+{% block title %}Panel de Gestión - CultureMap{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 text-primary"><i class="bi bi-speedometer2"></i> Panel de Administración</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group me-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary">Exportar Datos</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary mb-3 shadow h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Lugares</h6>
+                        <h1 class="display-4 fw-bold">{{ total_lugares }}</h1>
+                    </div>
+                    <i class="bi bi-geo-alt-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger mb-3 shadow h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Eventos</h6>
+                        <h1 class="display-4 fw-bold">{{ total_eventos }}</h1>
+                    </div>
+                    <i class="bi bi-calendar-event-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+
+        {% if request.session.rol == 'admin' %}
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3 shadow h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Usuarios</h6>
+                        <h1 class="display-4 fw-bold">{{ total_usuarios }}</h1>
+                    </div>
+                    <i class="bi bi-people-fill fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="col-md-3">
+            <div class="card bg-light mb-3 shadow h-100 border-secondary">
+                <div class="card-body text-center">
+                    <h6 class="card-title text-muted">Tu Rol Actual</h6>
+                    <h3 class="text-uppercase mt-2 text-dark">
+                        {% if request.session.rol == 'admin' %}
+                            👑 ADMIN
+                        {% elif request.session.rol == 'organizador' %}
+                            📋 ORGANIZADOR
+                        {% else %}
+                            👤 USUARIO
+                        {% endif %}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if error %}
+        <div class="alert alert-danger shadow-sm mb-4">
+            <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
+        </div>
+    {% endif %}
+
+    <ul class="nav nav-tabs nav-fill mb-3" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold" id="lugares-tab" data-bs-toggle="tab" data-bs-target="#lugares" type="button" role="tab" aria-controls="lugares" aria-selected="true">
+                🏛️ Gestión de Lugares
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold" id="eventos-tab" data-bs-toggle="tab" data-bs-target="#eventos" type="button" role="tab" aria-controls="eventos" aria-selected="false">
+                📅 Gestión de Eventos
+            </button>
+        </li>
+        {% if request.session.rol == 'admin' %}
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-success" id="usuarios-tab" data-bs-toggle="tab" data-bs-target="#usuarios" type="button" role="tab" aria-controls="usuarios" aria-selected="false">
+                👥 Gestión de Usuarios
+            </button>
+        </li>
+        {% endif %}
+    </ul>
+
+    <div class="tab-content bg-white p-4 border border-top-0 rounded-bottom shadow-sm" id="adminTabsContent">
+        
+        <div class="tab-pane fade show active" id="lugares" role="tabpanel">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lugar in lugares %}
+                        <tr {% if lugar.estado == 'rechazado' %}class="table-secondary text-muted"{% endif %}>
+                            <td>#{{ lugar.id }}</td>
+                            <td class="fw-semibold">{{ lugar.nombre }}</td>
+                            <td><span class="badge bg-info text-dark">{{ lugar.categoria }}</span></td>
+                            <td>
+                                {% if lugar.estado == 'aprobado' %}
+                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Aprobado</span>
+                                {% elif lugar.estado == 'rechazado' %}
+                                    <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Rechazado</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split"></i> Pendiente</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group" role="group">
+                                    
+                                    {% if lugar.estado != 'aprobado' %}
+                                    <form action="{% url 'gestionar_recurso' 'lugar' lugar.id 'aprobar' %}" method="POST" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-success" title="Aprobar / Readmitir">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+
+                                    {% if lugar.estado != 'rechazado' %}
+                                    <form action="{% url 'gestionar_recurso' 'lugar' lugar.id 'rechazar' %}" method="POST" class="d-inline ms-1">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-warning" title="Rechazar">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                    
+                                    <form action="{% url 'borrar_recurso' 'lugar' lugar.id %}" method="POST" onsubmit="return confirm('¿Seguro que quieres borrar {{ lugar.nombre }}?');" class="d-inline ms-1">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Borrar Definitivamente">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                            <tr><td colspan="5" class="text-center text-muted py-4">No hay lugares registrados.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="eventos" role="tabpanel">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Fecha</th>
+                            <th>Estado</th> <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for evento in eventos %}
+                        <tr {% if evento.estado == 'cancelado' or evento.estado == 'rechazado' %}class="table-secondary text-muted"{% endif %}>
+                            <td>#{{ evento.id }}</td>
+                            <td class="fw-semibold">{{ evento.nombre }}</td>
+                            <td>{{ evento.fecha_inicio|slice:":10" }}</td>
+                            <td>
+                                {% if evento.estado == 'publicado' or evento.estado == 'aprobado' %}
+                                    <span class="badge bg-success">Publicado</span>
+                                {% elif evento.estado == 'cancelado' or evento.estado == 'rechazado' %}
+                                    <span class="badge bg-danger">Rechazado</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Pendiente</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group" role="group">
+                                    {% if evento.estado != 'publicado' and evento.estado != 'aprobado' %}
+                                    <form action="{% url 'gestionar_recurso' 'evento' evento.id 'aprobar' %}" method="POST" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i></button>
+                                    </form>
+                                    {% endif %}
+
+                                    {% if evento.estado != 'cancelado' and evento.estado != 'rechazado' %}
+                                    <form action="{% url 'gestionar_recurso' 'evento' evento.id 'rechazar' %}" method="POST" class="d-inline ms-1">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-warning"><i class="bi bi-x-lg"></i></button>
+                                    </form>
+                                    {% endif %}
+                                    
+                                    <form action="{% url 'borrar_recurso' 'evento' evento.id %}" method="POST" onsubmit="return confirm('¿Borrar evento {{ evento.nombre }}?');" class="d-inline ms-1">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                            <tr><td colspan="6" class="text-center text-muted py-4">No hay eventos próximos.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if request.session.rol == 'admin' %}
+        <div class="tab-pane fade" id="usuarios" role="tabpanel" aria-labelledby="usuarios-tab">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark text-white">
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                            <th>Rol Actual</th>
+                            <th>Cambiar Rol</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in usuarios %}
+                        <tr>
+                            <td>#{{ u.id }}</td>
+                            <td class="fw-bold">{{ u.username }}</td>
+                            <td>{{ u.email }}</td>
+                            <td>
+                                <span class="badge {% if u.rol == 'admin' %}bg-danger{% elif u.rol == 'organizador' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                                    {{ u.rol|upper }}
+                                </span>
+                            </td>
+                            <td>
+                                <form action="{% url 'cambiar_rol' u.id %}" method="POST" class="d-flex gap-2 align-items-center">
+                                    {% csrf_token %}
+                                    <select name="rol" class="form-select form-select-sm" style="width: 140px;">
+                                        <option value="usuario" {% if u.rol == 'usuario' %}selected{% endif %}>Usuario</option>
+                                        <option value="organizador" {% if u.rol == 'organizador' %}selected{% endif %}>Organizador</option>
+                                        <option value="admin" {% if u.rol == 'admin' %}selected{% endif %}>Admin</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-save"></i></button>
+                                </form>
+                            </td>
+                            <td class="text-end">
+                                {% if u.username != request.session.username %}
+                                <form action="{% url 'borrar_recurso' 'usuario' u.id %}" method="POST" onsubmit="return confirm('¿Eliminar usuario {{ u.username }}?');" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-person-x-fill"></i></button>
+                                </form>
+                                {% else %}
+                                    <span class="text-muted small">(Tú)</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                            <tr><td colspan="6" class="text-center text-muted py-4">No se han cargado usuarios.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
