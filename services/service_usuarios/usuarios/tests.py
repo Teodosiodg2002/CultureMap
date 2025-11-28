@@ -10,7 +10,7 @@ class UsuarioAPITests(APITestCase):
         """
         Define las URLs que usaremos en los tests.
         """
-        self.register_url = reverse('user-register')
+        self.register_url = reverse('register')
         self.token_url = reverse('token_obtain_pair')
 
         self.user_data = {
