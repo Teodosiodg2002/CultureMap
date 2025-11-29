@@ -42,10 +42,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Convertir usuario a minúsculas
+        run: |
+          echo "OWNER_LC=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Construir y Subir (Push)
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ${{ matrix.context }}/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:latest
+          # Usamos la variable de entorno en minúsculas (env.OWNER_LC)
+          tags: ghcr.io/${{ env.OWNER_LC }}/${{ matrix.image }}:latest
