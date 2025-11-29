@@ -49,7 +49,7 @@ jobs:
       - name: Construir y Subir (Push)
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ${{ matrix.context }}
           file: ${{ matrix.context }}/Dockerfile
           push: true
           # Usamos la variable de entorno en minúsculas (env.OWNER_LC)
