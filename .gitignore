@@ -69,6 +69,7 @@
 **/ENV/
 **/env.bak/
 **/venv.bak/
+**/.env.test
 
 # mkdocs documentation
 **/site/

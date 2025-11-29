@@ -154,3 +154,37 @@ services:
       - ./services/service_eventos/.env
     networks:
       - culturemap_network
+
+  # ==============================================================================
+  # 6. MONITORIZACIÓN (Loki + Promtail + Grafana)
+  # ==============================================================================
+  loki:
+    image: grafana/loki:2.9.2
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitorizacion/loki-config.yaml:/etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - culturemap_network
+
+  promtail:
+    image: grafana/promtail:2.9.2
+    container_name: promtail
+    volumes:
+      - ./monitorizacion/promtail-config.yaml:/etc/promtail/config.yaml
+      - /var/run/docker.sock:/var/run/docker.sock:ro 
+    command: -config.file=/etc/promtail/config.yaml
+    networks:
+      - culturemap_network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin # Esta contraseña se cambia la primera vez que nos conectamos
+    networks:
+      - culturemap_network
