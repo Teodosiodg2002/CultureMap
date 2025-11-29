@@ -10,6 +10,7 @@ volumes:
   postgres_lugares_data:
   postgres_interacciones_data:
   postgres_eventos_data:
+  grafana_data:
 
 services:
   # ==============================================================================
@@ -185,6 +186,15 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin # Esta contraseña se cambia la primera vez que nos conectamos
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      
+      - ./monitorizacion/grafana/aprovisionamiento/datos:/etc/grafana/provisioning/datasources
+      
+      - ./monitorizacion/grafana/aprovisionamiento/dashboards:/etc/grafana/provisioning/dashboards
+      
+      - ./monitorizacion/grafana/dashboards:/var/lib/grafana/dashboards
     networks:
       - culturemap_network
