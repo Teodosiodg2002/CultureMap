@@ -2,95 +2,235 @@
 
 ## 🎯 Objetivos del Hito
 
-El objetivo de este hito es tomar la arquitectura de microservicios diseñada en el Hito 3 y desplegarla en un **clúster de contenedores** local usando Docker.
-
-Esto implica "dockerizar" cada servicio (creando un `Dockerfile`) y orquestar el clúster (con un `compose.yaml`) para que todos los servicios se comuniquen entre sí y funcionen como una aplicación cohesiva.
+El objetivo principal de este hito ha sido pasar desde una arquitectura monolítica a una arquitectura de microservicios distribuida y dockerizada. Para ello, se ha implementado y desplegado un clúster de contenedores orquestados por ***Docker Compose***.
+Al finalizar este hito, la aplicación consta con 5 microservicios funcionales, 5 bases de datos PostgreSQL aisladas y un stack completo de monitorización (Grafana, Loki y Prometheus)
 
 ---
 
-## 🔧 1. Justificación de la Infraestructura del Clúster
+## 1. Estructura del Clúster de Contenedores
 
-### 1.1. Contenedor de Base de Datos: PostgreSQL
+### 1.1. Diseño de la Arquitectura
 
-En el Hito 3, cada servicio usaba su propia base de datos `db.sqlite3`. Para un entorno de producción y de contenedores real, esta solución no es viable.
+La arquitectura de la aplicacion se compone de un clúster con los siguientes elementos interconectados a través de una red interna ('culturemap_network'):
 
-* **Problema de `sqlite3`**: Es una base de datos basada en un solo archivo, que no maneja bien la concurrencia (múltiples peticiones a la vez) y presenta problemas de bloqueo (`Database is locked`).
-* **Decisión Técnica**: Se migrarán todos los servicios a **PostgreSQL**.
-* **Justificación**:
-    1. **Estándar de Producción**: PostgreSQL es la base de datos relacional de código abierto más utilizada y recomendada para aplicaciones Django en producción.
-    2. **Contenedor Exclusivo (Rúbrica)**: La rúbrica pide "un contenedor cuyo contenido exclusivo sea almacenar datos". Implementaremos esto creando **contenedores PostgreSQL separados**, uno para cada microservicio
-    3. **Escalabilidad y Fiabilidad**: A diferencia de `sqlite3`, PostgreSQL está diseñado para alta concurrencia y operaciones complejas.
+1. **`web-frontend` (Gateway/BFF)**: Expuesto en el puerto `8000`. Actúa como cliente de las APIs internas. No tiene acceso directo a las bases de datos de los otros servicios. Se comunica exclusivamente vía HTTP (REST).
+2. **`service-usuarios`**: Microservicio de identidad. Gestiona el registro, login y emisión de tokens JWT.
+3. **`service-lugares`**: Microservicio de catálogo. Gestiona la información de los lugares.
+4. **`service-eventos`**: Microservicio de eventos. Gestiona la información de los eventos.
+5. **`service-interacciones`**: Microservicio social (valoraciones y comentarios).
 
-### 1.2. Justificación de la Imagen Base de Docker
+### 1.2. Gestión de Datos (Volúmenes Persistentes)
 
-La elección de la imagen base para los `Dockerfile` de los servicios es una decisión de arquitectura clave. Se ha realizado un "Estado del Arte" de las opciones más comunes:
+Debido al requisito en la práctica de tener un contenedor exclusivo cuya funcion sea almacenar datos, se ha implementado el patron de diseño ***"Database-per-Service"***.
 
-1. **Imagen `django` (Oficial de Django):**
-    * **Pros:** Es la imagen oficial del proyecto Django. Viene con una versión de Python y Django ya preinstalada y configurada.
-    * **Contras:** Como podemos ver en la siguiente imagen, está obsoleta y ella misma te indica usar contenedores python.
+En las fases anteriores, el desarrollo de la aplicación se centraba en SQLite. Sin embargo, para un entorno en contenedores, esta solución presenta problemas de concurrecia (múltiples peticiones a la vez) y carece de escalabilidad.
+
+* **Decisión Técnica**: Migración de SQLite a **PostgreSQL 16**. SQLite no soporta bien la concurrencia (múltiples accesos a la base de datos) en un entorno de contenedores.
+* **Implementación:** Se han desplegado **5 instancias independientes de PostgreSQL**, una para cada servicio.
+* **Persistencia:** Se han definido volúmenes de Docker con nombre (`postgres_lugares_data`, `postgres_usuarios_data`, etc.) para garantizar que los datos sobrevivan al ciclo de vida de los contenedores.
+
+---
+
+## 2. Configuración de los Contenedores
+
+### 2.1. Justificación de la Imagen Base
+
+Se ha realizado un análisis comparativo para seleccionar la imagen base de los microservicios Python/Django:
+
+1. **`django:onbuild` (Oficial)**: Es la imagen oficial del proyecto Django, y viene con una versión de Python y Django ya preinstalada y configurada. Sin embargo, Como podemos ver en la siguiente imagen, está obsoleta y ella misma te indica usar contenedores python.
 
 ![Django Deprecated](../images/django_deprecated.png)
 
-1. **Imagen `python:3.12-alpine` (Minimalista):**
-    * **Pros:** Es la imagen más pequeña posible (a menudo < 100MB), lo que la hace muy rápida y segura.
-    * **Contras:** Utiliza *Alpine Linux*, conocido por causar fallos de compilación con algunas funcionalidades de Python, especialmente `psycopg2` (PostgreSQL). El riesgo de compatibilidad es alto.
+2. **`python:3.12-alpine`**: Evaluada por su ligereza. Descartada debido a que utiliza *Alpine Linux*, conocido por causar fallos de compilación con algunas funcionalidades de Python, especialmente `psycopg2` (PostgreSQL). Existe cierto riesgo con que no sea compatible con mi aplicación.
 
-2. **Imagen `python:3.12-slim-bookworm`:**
-    * **Pros:** Proporciona un equilibrio ideal. Es la última versión estable de Python (`3.12`) sobre la última versión estable de Debian (`bookworm`) en un formato ligero (`slim`) que mantiene la compatibilidad total de `glibc`.
-    * **Contras:** Sigue siendo más grande que `alpine`.
-
-### Decisión Técnica: `python:3.12-slim-bookworm`
-
-Se ha elegido `python:3.12-slim-bookworm` como imagen base para todos los servicios.
-
-**Justificación:** Se descarta `alpine` por los altos riesgos de compatibilidad con `psycopg2`. Se descarta la imagen oficial `django` porque esta obsoleta. La imagen `python:3.12-slim-bookworm` da un control total sobre el entorno: nosotros instalamos `psycopg2-client`, `gunicorn`, y las dependencias de cada `requirements.txt`.
+3. **`python:3.12-slim-bookworm` (ELEGIDA)**:
+    * **Justificación:** Hemos seleccionado esta imagen porque representa el punto medio ideal entre eficiencia y facilidad de uso:
+      * *Peso reducido (Versión slim):* Contiene solo lo esencial para que Python funcione. Se han eliminado herramientas y archivos de "relleno" que no vamos a utilizar, lo que hace que la imagen ocupe mucho menos espacio y se descargue más rápido.
+      * *Máxima compatibilidad (Base Debian):* Al estar construida sobre Debian ("Bookworm"), funciona como un sistema Linux estándar. Esto garantiza que el sistema operativo se comporte de manera predecible y estable, igual que un servidor tradicional.
+      * *Facilidad de instalación:* A diferencia de otras versiones ultraligeras (como Alpine) que obligan a "fabricar" (compilar) las librerías complejas manualmente, esta versión nos permite instalar paquetes de Python ya preparados (wheels). Esto nos ahorra mucho tiempo de configuración y evita errores complejos durante la instalación de herramientas como bases de datos.
 
 ---
 
-## 🚀 2. Implementación de Dockerfiles y Compose
+## 3. Documentación de los Dockerfiles
 
-*(...Esta sección se rellenará con el código a medida que se implemente...)*
+Cada microservicio cuenta con su propio `Dockerfile`. A continuación se explica en detalle estructura estándar utilizada:
 
----
+```dockerfile
+# 1. Imagen Base: Python 3.12 Slim (Debian Bookworm)
+FROM python:3.12-slim-bookworm
 
-## 🛡️ 3. Implementación de Lógica de Negocio (Roles)
+# 2. Variables de entorno para optimizar Python en Docker
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-Para cumplir con la visión de la aplicación, se implementará un sistema de roles.
+# 3. Instalación de dependencias del sistema (necesarias para Postgres client)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
-* **`service_usuarios`**: Se modificará el modelo `User` para incluir un campo `rol` (con opciones: `USER`, `ORGANIZADOR`, `ADMIN`).
-* **`service_lugares`**: Se implementará un nuevo *endpoint* (`POST /api/catalogo/lugares/<id>/aprobar/`) protegido por permisos de DRF, que solo permitirá el acceso a usuarios con rol `ORGANIZADOR` o `ADMIN`.
+# 4. Directorio de trabajo
+WORKDIR /app
 
----
+# 5. Gestión de dependencias Python
+COPY requirements.txt .
+RUN python -m pip install --upgrade pip
+RUN python -m pip install gunicorn psycopg2-binary
+RUN python -m pip install -r requirements.txt
 
-## 🗓️ 4. Implementación del `service_eventos`
+# 6. Copia del código fuente
+COPY . .
 
-Para completar la funcionalidad de la plataforma, se creará el microservicio `service_eventos`, separado de `service_lugares`.
-
-* **Responsabilidad**: CRUD de eventos con fecha (conciertos, charlas, exposiciones).
-* **Implementación**: Se creará un nuevo proyecto Django (`services/service_eventos`) con su `Dockerfile` y su servicio `postgres-eventos` en el `compose.yaml`.
-
----
-
-## 🌐 5. Interconexión del Frontend
-
-Un objetivo clave de este hito es que la aplicación **funcione de manera interconectada**. El `service_web_frontend` será refactorizado para actuar como un cliente de las APIs de *backend*.
-
-* **Implementación**: Las vistas de `web_frontend` (ej. `index_lugares`) serán modificadas. En lugar de consultar su propia BBDD (`Lugar.objects.all()`), usarán la librería `requests` para llamar a las otras APIs a través de la red interna de Docker (ej. `requests.get('http://service_lugares:8000/api/catalogo/lugares/')`).
-
----
-
-## 📦 6. Despliegue en GitHub Packages y Tests de CI
-
-*(...Sección para documentar la configuración de CI y los tests de integración del clúster...)*
+# 7. Exposición y Arranque con Gunicorn (Servidor de Producción)
+EXPOSE 8000
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "[nombre_servicio].wsgi:application"]
+```
 
 ---
 
-## 📝 7. Implementación del Servicio de Logs
+## 4. Publicación en GitHub Packages 
 
-Para cumplir con el requisito de un "servicio de logs separado" y dar visibilidad al clúster, se implementará un stack de agregación de logs.
+Para automatizar la construcción y publicación de las imágenes, se ha configurado un flujo de trabajo en GitHub Actions.
 
-* **Diseño (Hito 3)**: En el Hito 3, todos los servicios (`web_frontend`, `service_usuarios`, etc.) fueron configurados para emitir sus logs a `stdout` (consola) en formato JSON.
-* **Implementación (Hito 4)**: Se añadirá al `compose.yaml` el stack **Loki y Promtail**.
-* **Loki**: Actuará como el microservicio de "base de datos de logs", recibiendo y almacenando los logs.
-* **Promtail**: Actuará como el "agente colector". Se configurará para descubrir automáticamente los contenedores de los otros servicios y "leer" sus *streams* de `stdout` para enviarlos a Loki.
-* **Visualización**: (Opcional, si el tiempo lo permite) Se añadirá un contenedor de **Grafana** al clúster, configurado con Loki como fuente de datos para poder visualizar y buscar en todos los logs de la aplicación desde una única interfaz web.
+### 4.1 Funcionamiento del Workflow
+
+El archivo `.github/workflows/docker.yml` implementa el proceso:
+
+1. **Activación:** Cada vez que se realiza un push en la rama main.
+
+2. **Construcción:** Se generan todas las imágenes necesarias utilizando una matriz de servicios.
+
+3. **Publicación:** Las imágenes se suben automáticamente al GitHub Container Registry (GHCR) con la etiqueta latest.
+
+Con esto, me aseguro que todas las imagenes de los contenedores esten siempre actualizadas y disponibles.
+
+---
+
+## 5. Composición del Clúster: compose.yaml
+
+El archivo `compose.yaml` orquesta la totalidad de la infraestructura. En él se especifican:
+
+* **Servicios:** configuración de puertos, rutas a archivos .env, dependencias y volúmenes.
+
+* **Redes:** definición de una red interna tipo bridge para la comunicación interna entre contenedores.
+
+* **Dependencias:** mediante depends_on, asegurando que los servicios dependientes se inicien en el orden adecuado.
+
+![Docker PS](../images/dockerps.png)
+
+---
+
+## 6. Test de Integración del Clúster
+
+Se ha implementado un test de integración en integration_tests/test_cluster.py que comprueba el funcionamiento conjunto de los servicios del clúster. Este test reproduce el flujo crítico de la aplicación:
+
+* Registro de usuarios con distintos roles.
+* Creación de lugares por parte de un usuario organizador.
+* Verificación del estado inicial del contenido.
+* Aprobación por parte de un administrador.
+* Confirmación de que el contenido aprobado es accesible públicamente.
+
+Este test garantiza que los microservicios operen correctamente de manera coordinada. 
+Como se puede observar en la imagen siguiente, el archivo de test usa un archivo .env.test que tendremos que configurar con los datos de una cuenta de administrador, sino, nos dará el siguiente error avisandonos de ello:
+
+`No hay credenciales de ADMIN en .env.test.`
+
+Sin embargo, si lo configuramos correctamente, nos aparecerá el siguiente mensaje en la terminal:
+
+![Integration Test](../images/integracionTest.png)
+
+---
+
+## 7. Evidencias Adicionales y Valor Añadido
+
+En esta sección se describen algunas funcionalidades adicionales que mejoran el proyecto y que sirven para cumplir con las rúbricas necesarias de este hito.
+
+### 7.1. Integración y Visualización Geoespacial  
+
+El microservicio **web-frontend** no se limita a mostrar páginas estáticas. Actúa como una capa intermedia que reúne información procedente de otros servicios antes de mostrarla al usuario. En lugar de que el navegador consulte varios servicios distintos, el frontend centraliza todo y entrega una vista unificada.
+
+#### **Integración de datos**
+
+La página principal realiza peticiones simultáneas a los microservicios **service-lugares** y **service-eventos**. Con esta información se construye una única vista que combina ambos tipos de datos.  
+Esto permite que el usuario pueda ver, en un mismo mapa, tanto los lugares como los eventos.
+
+#### **Diferenciación visual en el mapa**
+
+Para que la información sea más intuitiva, se aplican estilos distintos a los pines del mapa:
+
+* **Pines azules:** lugares.  
+* **Pines rojos:** eventos.
+
+#### **Tolerancia a fallos**
+
+Si alguno de los microservicios deja de responder, el sistema sigue funcionando con la información disponible.  
+Por ejemplo, si falla *service-eventos*, el mapa continúa mostrando los lugares, evitando que la página se quede en blanco o que el usuario encuentre errores.
+
+![MapaPines](../images/mapaPines.png)
+
+---
+
+### 7.2. Sistema de Gestión Centralizada
+
+Se ha implementado un **Panel de Administración** que permite gestionar desde un mismo lugar los datos de los distintos microservicios. El objetivo es facilitar el trabajo de administración sin necesidad de acceder directamente a las bases de datos.
+
+#### **Control de Acceso según rol**
+
+El panel se adapta automáticamente en función del rol asociado al token del usuario:
+
+* **Administrador**
+* **Organizador**
+* **Usuario**
+
+Cada rol ve solo aquello que le corresponde. Por ejemplo, los usuarios normales, no tienen acceso a dicho panel de administracion, como se puede observar en la imagen siguiente:
+
+![NoAdminPanel](../images/NoAdminPanel.png)
+
+Los usuarios organizadores y los administradores en cambio si tienen acceso:
+
+![AdminPanel](../images/AdminPanel.png)
+
+#### **Flujo de moderación**
+
+El contenido creado por los usuarios se almacena inicialmente con estado **PENDIENTE**.  
+Desde el panel, los administradores pueden:
+
+* Aprobar  
+* Rechazar  
+
+Estas acciones se realizan mediante llamadas a las APIs de cada microservicio, por lo que los cambios se reflejan directamente en sus bases de datos. Este proceso evita inconsistencias y permite un control de calidad del contenido antes de hacerlo público.
+
+![Gestion de Publicaciones](../images/GestionarPublicaciones.png)
+
+#### **Gestión de identidad**
+
+El administrador puede modificar los roles de los usuarios directamente desde el panel, sin tener que acceder a las bases de datos ni utilizar herramientas externas.  
+Esto centraliza la gestión y reduce el riesgo de errores.
+
+![Gestion de Usuarios](../images/GestionUser.png)
+
+---
+
+### 7.3. Observabilidad y Trazabilidad
+
+#### Monitorización con Promtail + Loki + Grafana
+
+En un sistema distribuido en contenedores es esencial disponer de una herramienta que centralice los logs y que permita ver que ocurre en cada momento. Para ello se ha desplegado una solución utilizando **Promtail**, **Loki** y **Grafana**.
+
+#### **Recogida de logs (Promtail)**
+
+Promtail está configurado para leer los registros que generan los contenedores de Docker.  
+Detecta automáticamente los contenedores activos y envía sus logs, junto con información útil como su nombre o su identificador.
+
+#### **Almacenamiento y consulta (Loki)**
+
+Loki guarda los logs de forma optimizada, permitiendo realizar búsquedas rápidas sin generar un gran consumo de recursos.  
+Esto facilita encontrar errores concretos o analizar el comportamiento de un microservicio.
+
+#### **Visualización (Grafana)**
+
+Grafana se ha configurado mediante archivos YAML, de forma que los paneles, las fuentes de datos y la configuración del entorno, se aplican automáticamente al iniciar el contenedor, sin necesidad de configuraciones manuales.  
+Esto hace que la monitorización sea completamente **reproducible**.
+
+![Dashboard de Grafana](../images/grafanaDashboard.png)
+
+---
