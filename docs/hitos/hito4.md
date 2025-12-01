@@ -3,7 +3,7 @@
 ## 🎯 Objetivos del Hito
 
 El objetivo principal de este hito ha sido pasar desde una arquitectura monolítica a una arquitectura de microservicios distribuida y dockerizada. Para ello, se ha implementado y desplegado un clúster de contenedores orquestados por ***Docker Compose***.
-Al finalizar este hito, la aplicación consta con 5 microservicios funcionales, 5 bases de datos PostgreSQL aisladas y un stack completo de monitorización (Grafana, Loki y Prometheus)
+Al finalizar este hito, la aplicación consta con 5 microservicios funcionales, 5 bases de datos PostgreSQL aisladas y un stack completo de monitorización (Grafana, Loki y Promtail)
 
 ---
 
