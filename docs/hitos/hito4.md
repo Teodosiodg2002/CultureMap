@@ -103,6 +103,8 @@ El archivo `.github/workflows/docker.yml` implementa el proceso:
 
 Con esto, me aseguro que todas las imagenes de los contenedores esten siempre actualizadas y disponibles.
 
+![GitHub Packages](../images/packages.png)
+
 ---
 
 ## 5. Composición del Clúster: compose.yaml
@@ -234,3 +236,59 @@ Esto hace que la monitorización sea completamente **reproducible**.
 ![Dashboard de Grafana](../images/grafanaDashboard.png)
 
 ---
+
+## 8. Guía de Despliegue (Manual de Usuario)
+
+Esta guía explica paso a paso cómo desplegar la infraestructura completa en un entorno local.
+
+### **Paso 1: Clonar el Repositorio**
+
+``` bash
+git clone https://github.com/Teodosiodg2002/CultureMap.git
+cd CultureMap
+```
+
+### **Paso 2: Levantar la Infraestructura**
+
+``` bash
+docker compose up -d
+```
+
+### **Paso 3: Inicializar el Esquema de Datos (Migraciones)**
+
+Como las bases de datos se crean vacías, es necesario generar las tablas ejecutando las migraciones.
+Realiza los siguientes comandos en este orden:
+
+1. **Microservicio de usuarios**
+
+``` bash
+docker compose exec service-usuarios python manage.py makemigrations usuarios
+docker compose exec service-usuarios python manage.py migrate
+```
+
+2. **Resto de microservicios**
+
+``` bash
+docker compose exec service-lugares python manage.py migrate
+docker compose exec service-eventos python manage.py migrate
+docker compose exec service-interacciones python manage.py migrate
+docker compose exec web-frontend python manage.py migrate
+```
+
+### Paso 4: Poblar la Base de Datos con Datos de Prueba
+
+Para evitar iniciar la aplicación completamente vacía, se incluye un script que genera usuarios, lugares y eventos de prueba.
+
+* Crear un superusuario necesario para el script
+
+``` bash
+docker compose exec service-usuarios python manage.py createsuperuser --username admin_general --email admin@culturemap.com
+```
+
+***Contraseña sugerida: admin1234***
+
+* Ejecutar el script de población
+
+``` bash
+python poblar_datos.py
+```
