@@ -13,7 +13,7 @@ Al finalizar este hito, la aplicación consta con 5 microservicios funcionales, 
 
 La arquitectura de la aplicacion se compone de un clúster con los siguientes elementos interconectados a través de una red interna ('culturemap_network'):
 
-1. **`web-frontend` (Gateway/BFF)**: Expuesto en el puerto `8000`. Actúa como cliente de las APIs internas. No tiene acceso directo a las bases de datos de los otros servicios. Se comunica exclusivamente vía HTTP (REST).
+1. **`web-frontend` (Gateway)**: Expuesto en el puerto `8000`. Actúa como cliente de las APIs internas. No tiene acceso directo a las bases de datos de los otros servicios. Se comunica exclusivamente vía HTTP (REST).
 2. **`service-usuarios`**: Microservicio de identidad. Gestiona el registro, login y emisión de tokens JWT.
 3. **`service-lugares`**: Microservicio de catálogo. Gestiona la información de los lugares.
 4. **`service-eventos`**: Microservicio de eventos. Gestiona la información de los eventos.
@@ -21,14 +21,18 @@ La arquitectura de la aplicacion se compone de un clúster con los siguientes el
 
 ### 1.2. Gestión de Datos (Volúmenes Persistentes)
 
-Debido al requisito en la práctica de tener un contenedor exclusivo cuya funcion sea almacenar datos, se ha implementado el patron de diseño ***"Database-per-Service"***.
+Para cumplir con el requisito de tener un contenedor dedicado al almacenamiento de datos, y siguiendo las buenas prácticas de microservicios, se ha implementado el patrón ***"Database-per-Service"*** (Una base de datos por servicio).
 
-En las fases anteriores, el desarrollo de la aplicación se centraba en SQLite. Sin embargo, para un entorno en contenedores, esta solución presenta problemas de concurrecia (múltiples peticiones a la vez) y carece de escalabilidad.
+**¿Por qué migrar de SQLite a PostgreSQL?** 
+En hitos anteriores se utilizó SQLite (un fichero local). Sin embargo, al desplegar la aplicación en contenedores, SQLite presenta dos problemas graves:
+* **Bloqueos:** No soporta bien que múltiples usuarios o servicios intenten escribir datos simultáneamente.
+* **Aislamiento:** Al estar embebido en el código, dificulta separar la lógica de la aplicación de sus datos.
 
-* **Decisión Técnica**: Migración de SQLite a **PostgreSQL 16**. SQLite no soporta bien la concurrencia (múltiples accesos a la base de datos) en un entorno de contenedores.
-* **Implementación:** Se han desplegado **5 instancias independientes de PostgreSQL**, una para cada servicio.
-* **Persistencia:** Se han definido volúmenes de Docker con nombre (`postgres_lugares_data`, `postgres_usuarios_data`, etc.) para garantizar que los datos sobrevivan al ciclo de vida de los contenedores.
+**Solución Implementada:** Se han desplegado 5 contenedores de PostgreSQL independientes. Cada microservicio (usuarios, lugares, etc.) se conecta exclusivamente a su propia instancia de base de datos, garantizando que ningún servicio pueda "romper" o leer los datos privados de otro.
 
+**Persistencia (Volúmenes):** Los contenedores Docker son, por definición, efímeros; si se reinician o borran, cualquier archivo creado en su interior desaparece. Para evitar que la base de datos se borre cada vez que apagamos el sistema, se han configurado Volúmenes de Docker (culturemap_postgres_lugares_data, culturemap_postgres_eventos_data, etc.).
+
+Estos volúmenes actúan como discos duros persistentes que sobreviven al ciclo de vida de los contenedores, asegurando que la información (usuarios registrados, lugares creados) se mantenga segura aunque se destruya la infraestructura.
 ---
 
 ## 2. Configuración de los Contenedores
