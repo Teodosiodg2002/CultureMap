@@ -23,8 +23,10 @@ La arquitectura de la aplicacion se compone de un clúster con los siguientes el
 
 Para cumplir con el requisito de tener un contenedor dedicado al almacenamiento de datos, y siguiendo las buenas prácticas de microservicios, se ha implementado el patrón ***"Database-per-Service"*** (Una base de datos por servicio).
 
-**¿Por qué migrar de SQLite a PostgreSQL?** 
+**¿Por qué migrar de SQLite a PostgreSQL?**
+
 En hitos anteriores se utilizó SQLite (un fichero local). Sin embargo, al desplegar la aplicación en contenedores, SQLite presenta dos problemas graves:
+
 * **Bloqueos:** No soporta bien que múltiples usuarios o servicios intenten escribir datos simultáneamente.
 * **Aislamiento:** Al estar embebido en el código, dificulta separar la lógica de la aplicación de sus datos.
 
@@ -33,6 +35,9 @@ En hitos anteriores se utilizó SQLite (un fichero local). Sin embargo, al despl
 **Persistencia (Volúmenes):** Los contenedores Docker son, por definición, efímeros; si se reinician o borran, cualquier archivo creado en su interior desaparece. Para evitar que la base de datos se borre cada vez que apagamos el sistema, se han configurado Volúmenes de Docker (culturemap_postgres_lugares_data, culturemap_postgres_eventos_data, etc.).
 
 Estos volúmenes actúan como discos duros persistentes que sobreviven al ciclo de vida de los contenedores, asegurando que la información (usuarios registrados, lugares creados) se mantenga segura aunque se destruya la infraestructura.
+
+![Volumenes Docker](../images/persistenciaVolumenes.png)
+
 ---
 
 ## 2. Configuración de los Contenedores
@@ -91,21 +96,26 @@ CMD ["gunicorn", "--bind", "0.0.0.0:8000", "[nombre_servicio].wsgi:application"]
 
 ---
 
-## 4. Publicación en GitHub Packages 
+## 4. Publicación en GitHub Packages
 
-Para automatizar la construcción y publicación de las imágenes, se ha configurado un flujo de trabajo en GitHub Actions.
+Para automatizar la construcción y publicación de las imágenes, se ha configurado un flujo de trabajo de **Integración y Despliegue Continuo (CI/CD)** utilizando **GitHub Actions**.
 
 ### 4.1 Funcionamiento del Workflow
 
-El archivo `.github/workflows/docker.yml` implementa el proceso:
+El archivo `.github/workflows/docker_publish.yml` implementa el siguiente proceso automatizado:
 
-1. **Activación:** Cada vez que se realiza un push en la rama main.
+1. **Activación:** El proceso se dispara automáticamente con cada `push` a la rama `main`, pero únicamente si el workflow previo de tests (`django_tests.yml`) ha finalizado exitosamente.
+2. **Construcción:** Se utiliza una matriz de configuración para generar en paralelo las imágenes Docker de los 5 microservicios.
+3. **Publicación:** Las imágenes resultantes se suben al **GitHub Container Registry (GHCR)** etiquetadas como `latest`.
 
-2. **Construcción:** Se generan todas las imágenes necesarias utilizando una matriz de servicios.
+**Evidencia de Ejecución del Pipeline:**
+En la siguiente imagen se observa la traza de ejecución exitosa, validando primero los tests unitarios y procediendo posteriormente a la construcción y publicación de los artefactos.
 
-3. **Publicación:** Las imágenes se suben automáticamente al GitHub Container Registry (GHCR) con la etiqueta latest.
+![Pipeline de GitHub Actions Exitoso](../images/CIActualizado.png)
 
-Con esto, me aseguro que todas las imagenes de los contenedores esten siempre actualizadas y disponibles.
+### 4.2. Registro de Imágenes
+
+Como resultado del proceso de CI/CD, las imágenes de los contenedores quedan alojadas públicamente y listas para su despliegue.
 
 ![GitHub Packages](../images/packages.png)
 
@@ -282,14 +292,6 @@ docker compose exec web-frontend python manage.py migrate
 ### Paso 4: Poblar la Base de Datos con Datos de Prueba
 
 Para evitar iniciar la aplicación completamente vacía, se incluye un script que genera usuarios, lugares y eventos de prueba.
-
-* Crear un superusuario necesario para el script
-
-``` bash
-docker compose exec service-usuarios python manage.py createsuperuser --username admin_general --email admin@culturemap.com
-```
-
-***Contraseña sugerida: admin1234***
 
 * Ejecutar el script de población
 
