@@ -1,16 +1,78 @@
-{%extends 'lugares/base.html'%}
-{%block title%} {{ lugar.nombre }} - CultureMap {%endblock%}
-{%block content%}
-    <h1>{{ lugar.nombre }}</h1>
-    <p><strong>Categoría:</strong> {{ lugar.get_categoria_display }}</p>
+{% extends 'lugares/base.html' %}
+
+{% block title %}{{ lugar.nombre }} - CultureMap{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
     
-    <h2>Descripción</h2>
-    <p>{{ lugar.descripcion }}</p>
-    
-    {% if lugar.direccion %}
-        <p><strong>Dirección:</strong> {{ lugar.direccion }}</p>
-    {% endif %}
-    
-    <br>
-    <a href="{% url 'index_lugares' %}">Volver a la lista</a>
-{%endblock%}
+    <div class="card shadow-sm mb-5">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1 class="card-title text-primary mb-0">{{ lugar.nombre }}</h1>
+                <span class="badge bg-info text-dark fs-6">{{ lugar.categoria }}</span>
+            </div>
+            
+            <p class="lead">{{ lugar.descripcion }}</p>
+            
+            <div class="text-muted mt-3">
+                <i class="bi bi-geo-alt-fill"></i> 
+                Lat: {{ lugar.lat }}, Lng: {{ lugar.lng }}
+            </div>
+            
+            <a href="{% url 'index_lugares' %}" class="btn btn-outline-secondary mt-3">
+                &larr; Volver al mapa
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <h3 class="mb-4"><i class="bi bi-chat-dots"></i> Comentarios y Reseñas</h3>
+
+            <div class="card mb-4 bg-light border-0">
+                <div class="card-body">
+                    {% if request.session.access_token %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-2">
+                                <label for="comentario" class="form-label fw-bold">Deja tu opinión:</label>
+                                <textarea name="comentario" id="comentario" class="form-control" rows="3" placeholder="¿Qué te pareció este sitio?" required></textarea>
+                            </div>
+                            <div class="text-end">
+                                <button class="btn btn-primary" type="submit">Publicar Comentario</button>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <p class="mb-2 text-muted">¿Has estado aquí? Inicia sesión para compartir tu experiencia.</p>
+                            <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm">Iniciar Sesión</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="list-group shadow-sm">
+                {% for c in comentarios %}
+                    <div class="list-group-item p-3">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1 fw-bold text-primary">
+                                <i class="bi bi-person-circle"></i> {{ c.username }}
+                            </h6>
+                            <small class="text-muted">{{ c.creado_en|slice:":10" }}</small>
+                        </div>
+                        <p class="mb-1 mt-2">{{ c.texto }}</p>
+                    </div>
+                {% empty %}
+                    <div class="alert alert-light text-center border">
+                        <i class="bi bi-chat-square-text fs-1 text-muted"></i>
+                        <p class="mt-2">Aún no hay comentarios. ¡Sé el primero!</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

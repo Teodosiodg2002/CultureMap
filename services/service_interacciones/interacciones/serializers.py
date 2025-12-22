@@ -1,47 +1,28 @@
 from rest_framework import serializers
-from .models import Comentario, Voto, Favorito
+from .models import Comentario, Voto
 
-# --- Serializer para Comentarios ---
+# --- Serializador para Comentarios ---
+
 class ComentarioSerializer(serializers.ModelSerializer):
-    """
-    Traductor para el modelo Comentario.
-    El usuario solo necesita enviar el campo 'texto'.
-    """
     class Meta:
         model = Comentario
-        fields = [
-            'id', 
-            'lugar_id',     
-            'usuario_id',  
-            'texto',      
-            'creado_en'
-        ]
-        read_only_fields = ['lugar_id', 'usuario_id', 'creado_en']
+        fields = ['id', 'usuario_id', 'lugar_id', 'texto', 'creado_en']
+        read_only_fields = ['usuario_id', 'lugar_id', 'creado_en']
 
-# --- Serializer para Votos ---
+# --- Serializador para Votos ---
+
 class VotoSerializer(serializers.ModelSerializer):
-    """
-    Traductor para el modelo Voto.
-    El usuario solo necesita enviar el campo 'valor' (1 o -1).
-    """
     class Meta:
         model = Voto
-        fields = [
-            'id', 
-            'lugar_id', 
-            'usuario_id', 
-            'valor',
-            'creado_en'
-        ]
+        fields = ['id', 'usuario_id', 'lugar_id', 'valor', 'creado_en']
+        
         read_only_fields = ['usuario_id', 'creado_en']
 
-# --- Serializer para Favoritos ---
-class FavoritoSerializer(serializers.ModelSerializer):
-    """
-    Traductor para el modelo Favorito.
-    Este serializer no necesita campos de entrada, solo de salida.
-    """
-    class Meta:
-        model = Favorito
-        fields = ['id', 'lugar_id', 'usuario_id', 'creado_en']
-        read_only_fields = ['lugar_id', 'usuario_id', 'creado_en']
+    def validate_valor(self, value):
+        """
+        Validación extra para asegurar que el valor es 1 o -1,
+        aunque el modelo ya tiene 'choices', esto da un mensaje más limpio.
+        """
+        if value not in [1, -1]:
+            raise serializers.ValidationError("El voto debe ser 1 (Upvote) o -1 (Downvote).")
+        return value

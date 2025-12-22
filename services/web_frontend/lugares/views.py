@@ -50,23 +50,64 @@ def index_lugares(request):
 # --- VISTA: DETALLE DE LUGAR ---
 def detalle_lugar(request, pk):
     lugar = None
+    comentarios = []
     error = None
     
-    try:
-        response = requests.get(f"{settings.API_LUGARES_URL}/lugares/{pk}/")
+    # --- A. GESTIONAR ENVÍO DE COMENTARIO (POST) ---
+    if request.method == 'POST':
+        texto = request.POST.get('comentario')
+        token = request.session.get('access_token')
         
-        if response.status_code == 200:
-            lugar = response.json()
-        elif response.status_code == 404:
+        if not token:
+            return redirect('login')
+            
+        if texto:
+            try:
+                headers = {'Authorization': f'Bearer {token}'}
+                data = {
+                    'texto': texto
+                }
+                
+                url = f"{settings.API_INTERACCIONES_URL}/comentarios/{pk}/"
+                
+                requests.post(url, json=data, headers=headers)
+                
+            except requests.exceptions.RequestException:
+                pass
+            
+        return redirect('detalle_lugar', pk=pk)
+            
+        
+    # --- B. OBTENER DATOS PARA MOSTRAR (GET) ---
+    try:
+        res_lugar = requests.get(f"{settings.API_LUGARES_URL}/lugares/{pk}/")
+        
+        if res_lugar.status_code == 200:
+            lugar = res_lugar.json()
+            
+            try:
+                url_comentarios = f"{settings.API_INTERACCIONES_URL}/comentarios/{pk}/"
+                
+                res_comments = requests.get(url_comentarios)
+                
+                if res_comments.status_code == 200:
+                    comentarios = res_comments.json()
+            except requests.exceptions.RequestException:
+                print("Advertencia: No se pudo conectar con service-interacciones")
+
+        elif res_lugar.status_code == 404:
             raise Http404("Lugar no encontrado")
         else:
-            error = f"Error del servidor: {response.status_code}"
-            
+            error = f"Error Lugar: {res_lugar.status_code}"
+
     except requests.exceptions.RequestException:
-        error = "No se pudo conectar con el servicio de lugares."
+        error = "Error de conexión con los servicios."
 
-    return render(request, 'lugares/detalle_lugar.html', {'lugar': lugar, 'error': error})
-
+    return render(request, 'lugares/detalle_lugar.html', {
+        'lugar': lugar, 
+        'comentarios': comentarios,
+        'error': error
+    })
 
 # --- VISTA: CREAR LUGAR ---
 def crear_lugar(request):
