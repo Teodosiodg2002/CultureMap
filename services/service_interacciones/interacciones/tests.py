@@ -18,7 +18,7 @@ class InteraccionesAPITests(APITestCase):
         self.lugar_id_prueba = 1
 
         # 3. URL para la vista de Votos
-        self.votar_url = reverse('voto-crear')
+        self.votar_url = reverse('voto-create')
 
         # 4. URL para la vista de Comentarios (para el lugar 1)
         self.comentarios_url = reverse('comentario-lista-crear', kwargs={'lugar_id': self.lugar_id_prueba})
