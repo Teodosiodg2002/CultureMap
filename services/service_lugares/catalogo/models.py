@@ -1,10 +1,6 @@
-# services/service_lugares/catalogo/models.py
-
-from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
 
 class Categoria(models.TextChoices):
     MIRADOR = "mirador", _("Mirador")
@@ -21,18 +17,15 @@ class EstadoAprobacion(models.TextChoices):
     RECHAZADO = "rechazado", _("Rechazado")
 
 class Lugar(models.Model):
-
-    nombre = models.CharField(max_length=200, verbose_name=_("Nombre del lugar"), db_index=True)
-    descripcion = models.TextField(verbose_name=_("Descripción"))    
-    direccion = models.CharField(max_length=255, verbose_name=_("Dirección"), blank=True, null=True)
+    nombre = models.CharField(max_length=200, db_index=True)
+    descripcion = models.TextField()
+    direccion = models.CharField(max_length=255, blank=True, null=True)
 
     lat = models.FloatField(
-        verbose_name=_("Latitud"),
         validators=[MinValueValidator(-90.0), MaxValueValidator(90.0)],
         null=True, blank=True
     )
     lng = models.FloatField(
-        verbose_name=_("Longitud"),
         validators=[MinValueValidator(-180.0), MaxValueValidator(180.0)],
         null=True, blank=True
     )
@@ -40,25 +33,22 @@ class Lugar(models.Model):
     categoria = models.CharField(
         max_length=30, 
         choices=Categoria.choices, 
-        default=Categoria.OTROS, 
-        verbose_name=_("Categoría"), 
+        default=Categoria.OTROS,
         db_index=True
     )
 
     estado = models.CharField(
         max_length=20, 
         choices=EstadoAprobacion.choices, 
-        default=EstadoAprobacion.PENDIENTE, 
-        verbose_name=_("Estado de aprobación"), 
+        default=EstadoAprobacion.PENDIENTE,
         db_index=True
     )
-    motivo_rechazo = models.TextField(verbose_name=_("Motivo de rechazo"), blank=True, null=True)
-    publicado = models.BooleanField(default=True, verbose_name=_("Publicado"), db_index=True)  
+    motivo_rechazo = models.TextField(blank=True, null=True)
+    publicado = models.BooleanField(default=True, db_index=True)  
 
-    creado_por_id = models.IntegerField(verbose_name=_("ID del creador"), db_index=True)
-
-    creado_en = models.DateTimeField(auto_now_add=True, verbose_name=_("Fecha de creación"), db_index=True)
-    actualizado_en = models.DateTimeField(auto_now=True, verbose_name=_("Última actualización"))
+    creado_por_id = models.IntegerField(db_index=True)
+    creado_en = models.DateTimeField(auto_now_add=True, db_index=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = _("Lugar")
@@ -70,12 +60,8 @@ class Lugar(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.nombre} ({self.get_categoria_display()})"
+        return f"{self.nombre} ({self.categoria})"
 
     @property
     def esta_aprobado(self):
         return self.estado == EstadoAprobacion.APROBADO
-
-    @property
-    def es_visible(self):
-        return self.esta_aprobado and self.publicado

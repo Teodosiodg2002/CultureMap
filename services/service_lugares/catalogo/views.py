@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Lugar, EstadoAprobacion
@@ -16,19 +16,17 @@ class LugarViewSet(viewsets.ModelViewSet):
         if user.is_authenticated and rol in ['admin', 'organizador']:
             return Lugar.objects.all().order_by('-creado_en')
         
-        return Lugar.objects.filter(estado=EstadoAprobacion.APROBADO, publicado=True).order_by('-creado_en')
+        return Lugar.objects.filter(
+            estado=EstadoAprobacion.APROBADO, 
+            publicado=True
+        ).order_by('-creado_en')
 
     def perform_create(self, serializer):
-        usuario_id = 1
-        if self.request.user and self.request.user.is_authenticated:
-            usuario_id = self.request.user.id
-            
         serializer.save(
-            creado_por_id=usuario_id,
+            creado_por_id=self.request.user.id if self.request.user.is_authenticated else 1,
             estado=EstadoAprobacion.PENDIENTE
         )
 
-    # --- ACCIONES DE MODERACIÓN ---
     @action(detail=True, methods=['put'], permission_classes=[IsOrganizadorOrAdmin])
     def aprobar(self, request, pk=None):
         lugar = self.get_object()
