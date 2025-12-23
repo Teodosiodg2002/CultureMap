@@ -23,7 +23,7 @@ def detalle_lugar(request, pk):
     if not lugar:
         raise Http404("Lugar no encontrado")
 
-    # 2. Gestionar Comentario (POST)
+    # 2. Gestionar Comentario (POST existente)
     if request.method == 'POST':
         texto = request.POST.get('comentario')
         token = request.session.get('access_token')
@@ -34,10 +34,22 @@ def detalle_lugar(request, pk):
             ApiClient.post(url, {'texto': texto}, token)
         return redirect('detalle_lugar', pk=pk)
 
-    # 3. Renderizar (GET)
+    # 3. INTERACCIONES: Verificar si es Favorito
+    es_favorito = False
+    token = request.session.get('access_token')
+    if token:
+        # Obtenemos la lista de IDs favoritos del usuario [1, 5, 20...]
+        mis_favoritos = ApiClient.get_mis_favoritos(token)
+        # Comprobamos si EL lUGAR ACTUAL está en esa lista
+        # (Asegúrate de convertir a entero por si acaso)
+        if int(pk) in mis_favoritos:
+            es_favorito = True
+
+    # 4. Renderizar
     return render(request, 'lugares/detalle_lugar.html', {
         'lugar': lugar,
-        'comentarios': ApiClient.get_comentarios(pk)
+        'comentarios': ApiClient.get_comentarios(pk),
+        'es_favorito': es_favorito 
     })
 
 # --- GESTIÓN DE USUARIOS (LOGIN/REGISTER) ---
@@ -191,3 +203,24 @@ def gestionar_recurso(request, tipo, pk, accion):
     ApiClient.put(url, token=token)
     
     return redirect('dashboard')
+
+def accion_favorito(request, pk):
+    """Maneja el clic en el corazón"""
+    if request.method == 'POST':
+        token = request.session.get('access_token')
+        if not token: return redirect('login')
+        
+        ApiClient.toggle_favorito(pk, token)
+        
+    return redirect('detalle_lugar', pk=pk)
+
+def accion_votar(request, pk, valor):
+    """Maneja el clic en Upvote (1) o Downvote (-1)"""
+    if request.method == 'POST':
+        token = request.session.get('access_token')
+        if not token: return redirect('login')
+        
+        # valor viene como string '1' o '-1' desde la URL
+        ApiClient.enviar_voto(pk, int(valor), token)
+        
+    return redirect('detalle_lugar', pk=pk)
