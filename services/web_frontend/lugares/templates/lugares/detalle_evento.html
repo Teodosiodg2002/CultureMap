@@ -1,0 +1,138 @@
+{% extends 'lugares/base.html' %}
+
+{% block title %}{{ evento.nombre }} - CultureMap{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+    
+    <div class="card shadow-sm border-danger mb-5">
+        <div class="card-header bg-danger text-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="h4 mb-0"><i class="bi bi-calendar-event me-2"></i> {{ evento.nombre }}</h2>
+                
+                <div class="d-flex align-items-center gap-3">
+                    {% if puntuacion.total > 0 %}
+                    <div class="d-flex align-items-center bg-white text-danger rounded px-2 py-1 shadow-sm">
+                        <span class="fw-bold fs-5 me-1">{{ puntuacion.media }}</span>
+                        <i class="bi bi-star-fill small"></i>
+                        <span class="small ms-1 opacity-75">({{ puntuacion.total }})</span>
+                    </div>
+                    {% endif %}
+                    <span class="badge bg-white text-danger fs-6">{{ evento.categoria|upper }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            
+            <div class="alert alert-light border-start border-4 border-danger d-flex align-items-center gap-3 mb-4">
+                <div class="text-center px-3">
+                    <h1 class="display-6 fw-bold text-danger mb-0">{{ evento.fecha_inicio|slice:"8:10" }}</h1>
+                    <small class="text-uppercase fw-bold text-muted">Día</small>
+                </div>
+                <div class="vr"></div>
+                <div>
+                    <p class="mb-0 fs-5"><i class="bi bi-clock"></i> {{ evento.fecha_inicio|slice:"11:16" }}</p>
+                    <small class="text-muted">{{ evento.fecha_inicio|slice:":10" }}</small>
+                </div>
+            </div>
+
+            <h5 class="text-danger">Sobre este evento:</h5>
+            <p class="lead">{{ evento.descripcion }}</p>
+            
+            <div class="text-muted mt-3 mb-4 small">
+                <i class="bi bi-geo-alt-fill"></i> 
+                Ubicación: {{ evento.lat }}, {{ evento.lng }}
+            </div>
+
+            <div class="d-flex align-items-center gap-2 border-top pt-3">
+                {% if request.session.access_token %}
+                    <form action="{% url 'accion_favorito' 'evento' evento.id %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn {% if es_favorito %}btn-danger{% else %}btn-outline-danger{% endif %}" title="Me interesa">
+                            <i class="bi {% if es_favorito %}bi-heart-fill{% else %}bi-heart{% endif %}"></i> 
+                            {% if es_favorito %}Te interesa{% else %}Me interesa{% endif %}
+                        </button>
+                    </form>
+
+                    <div class="vr mx-2"></div>
+
+                    <span class="text-muted small me-1">Tu voto:</span>
+                    <div class="d-flex">
+                        {% for i in "12345" %}
+                            {% with rating=forloop.counter %}
+                            <form action="{% url 'accion_votar' 'evento' evento.id rating %}" method="POST" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-link p-0 text-decoration-none fs-4" title="Votar {{ rating }}">
+                                    {% if rating <= mi_voto %}
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                    {% else %}
+                                        <i class="bi bi-star text-secondary opacity-25"></i>
+                                    {% endif %}
+                                </button>
+                            </form>
+                            {% endwith %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-outline-danger">
+                        <i class="bi bi-heart"></i> Me interesa
+                    </a>
+                {% endif %}
+
+                <div class="ms-auto">
+                    <a href="{% url 'index_eventos' %}" class="btn btn-link text-decoration-none text-danger">
+                        &larr; Volver a la agenda
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <h4 class="mb-4 text-danger"><i class="bi bi-chat-left-text"></i> Debate sobre el evento</h4>
+
+            <div class="card mb-4 bg-light border-0">
+                <div class="card-body">
+                    {% if request.session.access_token %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-2">
+                                <label class="form-label fw-bold">¿Vas a ir? ¡Comenta algo!</label>
+                                <textarea name="comentario" class="form-control" rows="2" placeholder="Pregunta dudas o confirma asistencia..." required></textarea>
+                            </div>
+                            <div class="text-end">
+                                <button class="btn btn-danger" type="submit">Comentar</button>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <a href="{% url 'login' %}" class="btn btn-outline-danger btn-sm">Inicia Sesión para comentar</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="list-group shadow-sm">
+                {% for c in comentarios %}
+                    <div class="list-group-item p-3 border-start border-3 border-danger">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1 fw-bold text-danger">
+                                <i class="bi bi-person"></i> {{ c.username }}
+                            </h6>
+                            <small class="text-muted">{{ c.creado_en|slice:":10" }}</small>
+                        </div>
+                        <p class="mb-0 mt-1">{{ c.texto }}</p>
+                    </div>
+                {% empty %}
+                    <div class="alert alert-light text-center border border-danger-subtle">
+                        <p class="mt-2 text-muted">Nadie ha comentado aún sobre este evento.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -9,80 +9,101 @@ class InteraccionesAPITests(APITestCase):
         # Datos de prueba
         self.usuario_id_prueba = 1
         self.lugar_id_prueba = 100
+        self.evento_id_prueba = 200
         
-        # URLs (Nombres actualizados según el refactor)
-        self.comentarios_url = reverse('comentario-list-create', kwargs={'lugar_id': self.lugar_id_prueba})
-        self.votar_url = reverse('voto-upsert')  # <-- CORREGIDO
+        # URLs Actualizadas (Segun el nuevo urls.py)
+        self.comentarios_lugar_url = reverse('comentario-lugar', kwargs={'lugar_id': self.lugar_id_prueba})
+        self.comentarios_evento_url = reverse('comentario-evento', kwargs={'evento_id': self.evento_id_prueba})
+        
+        self.votar_url = reverse('voto-upsert')
         self.favoritos_toggle_url = reverse('favorito-toggle')
-        self.favoritos_list_url = reverse('favorito-list')
+        self.mis_votos_url = reverse('mis-votos')
 
     # --- TEST COMENTARIOS ---
 
-    def test_get_comentarios_anonimo_exito(self):
-        """Un usuario anónimo PUEDE VER los comentarios."""
-        response = self.client.get(self.comentarios_url)
+    def test_get_comentarios_lugar_exito(self):
+        """Un usuario anónimo PUEDE VER los comentarios de un lugar."""
+        response = self.client.get(self.comentarios_lugar_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_post_comentario_anonimo_falla_401(self):
+    def test_post_comentario_anonimo_falla(self):
         """Un usuario anónimo NO PUEDE comentar."""
         data = {'texto': 'Comentario anónimo'}
-        response = self.client.post(self.comentarios_url, data)
+        response = self.client.post(self.comentarios_lugar_url, data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_post_comentario_autenticado_exito(self):
-        """Un usuario autenticado PUEDE comentar."""
-        self.client.force_authenticate(user=None, token=None) 
-        # Simulamos autenticación forzando el request.user
-        # Nota: En DRF puro testear auth requiere configurar un usuario real o mockear.
-        # Para simplificar y dado que usamos microservicios con tokens simulados:
-        
-        # Mockeamos la propiedad 'user' en la vista o usamos force_authenticate con un objeto simple
+    def test_post_comentario_lugar_autenticado(self):
+        """Un usuario autenticado PUEDE comentar en un lugar."""
         from django.contrib.auth.models import User
         user = User.objects.create_user(username='testuser', password='password')
         self.client.force_authenticate(user=user)
 
         data = {'texto': 'Excelente lugar'}
-        response = self.client.post(self.comentarios_url, data)
+        response = self.client.post(self.comentarios_lugar_url, data)
+        
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Comentario.objects.count(), 1)
-        self.assertEqual(Comentario.objects.get().usuario_id, user.id)
+        self.assertEqual(Comentario.objects.first().lugar_id, self.lugar_id_prueba)
 
-    # --- TEST VOTOS ---
+    def test_post_comentario_evento_autenticado(self):
+        """Un usuario autenticado PUEDE comentar en un evento (Polimorfismo)."""
+        from django.contrib.auth.models import User
+        user = User.objects.create_user(username='eventfan', password='password')
+        self.client.force_authenticate(user=user)
 
-    def test_post_voto_autenticado_upsert(self):
-        """Prueba que el voto se crea y luego se actualiza (Upsert)."""
+        data = {'texto': 'Me encanta este evento'}
+        response = self.client.post(self.comentarios_evento_url, data)
+        
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Comentario.objects.count(), 1)
+        self.assertEqual(Comentario.objects.first().evento_id, self.evento_id_prueba)
+
+    # --- TEST VOTOS (ESTRELLAS 1-5) ---
+
+    def test_post_voto_lugar_upsert(self):
+        """Prueba votar un lugar con estrellas (1-5) y actualizarlo."""
         from django.contrib.auth.models import User
         user = User.objects.create_user(username='voter', password='password')
         self.client.force_authenticate(user=user)
 
-        # 1. Crear Voto (Upvote)
-        data = {'lugar_id': self.lugar_id_prueba, 'valor': 1}
+        # 1. Crear Voto (5 Estrellas)
+        data = {'lugar_id': self.lugar_id_prueba, 'valor': 5}
         response = self.client.post(self.votar_url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Voto.objects.get(usuario_id=user.id).valor, 1)
+        self.assertEqual(Voto.objects.get(usuario_id=user.id).valor, 5)
 
-        # 2. Actualizar Voto (Downvote) - Misma URL, mismo usuario
-        data['valor'] = -1
+        # 2. Actualizar Voto (Bajada a 3 Estrellas) - Upsert
+        data['valor'] = 3
         response = self.client.post(self.votar_url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(Voto.objects.get(usuario_id=user.id).valor, -1)
+        self.assertEqual(Voto.objects.get(usuario_id=user.id).valor, 3)
+
+    def test_post_voto_invalido(self):
+        """El voto debe ser entre 1 y 5."""
+        from django.contrib.auth.models import User
+        user = User.objects.create_user(username='hacker', password='password')
+        self.client.force_authenticate(user=user)
+
+        data = {'lugar_id': self.lugar_id_prueba, 'valor': 10} # Inválido
+        response = self.client.post(self.votar_url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     # --- TEST FAVORITOS ---
 
-    def test_favorito_toggle(self):
-        """Prueba dar like y quitar like."""
+    def test_favorito_toggle_evento(self):
+        """Prueba dar like y quitar like a un evento."""
         from django.contrib.auth.models import User
         user = User.objects.create_user(username='fan', password='password')
         self.client.force_authenticate(user=user)
 
-        data = {'lugar_id': self.lugar_id_prueba}
+        data = {'evento_id': self.evento_id_prueba}
 
         # 1. Dar Like (Crear)
         response = self.client.post(self.favoritos_toggle_url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(Favorito.objects.filter(usuario_id=user.id, lugar_id=self.lugar_id_prueba).exists())
+        self.assertTrue(Favorito.objects.filter(usuario_id=user.id, evento_id=self.evento_id_prueba).exists())
 
         # 2. Quitar Like (Borrar)
         response = self.client.post(self.favoritos_toggle_url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertFalse(Favorito.objects.filter(usuario_id=user.id, lugar_id=self.lugar_id_prueba).exists())
+        self.assertFalse(Favorito.objects.filter(usuario_id=user.id, evento_id=self.evento_id_prueba).exists())

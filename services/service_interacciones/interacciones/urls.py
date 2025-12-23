@@ -3,17 +3,22 @@ from .views import (
     ComentarioListCreateView, 
     VotoUpsertView, 
     FavoritoToggleView, 
-    FavoritoListView
+    FavoritoListView,
+    VotoListView,     
+    VotoResumenView    
 )
 
 urlpatterns = [
-    # Comentarios (vinculados a un lugar en la URL)
-    path('comentarios/<int:lugar_id>/', ComentarioListCreateView.as_view(), name='comentario-list-create'),
+    # Comentarios
+    path('comentarios/lugar/<int:lugar_id>/', ComentarioListCreateView.as_view(), name='comentario-lugar'),
+    path('comentarios/evento/<int:evento_id>/', ComentarioListCreateView.as_view(), name='comentario-evento'),
     
-    # Votos
+    # Acciones
     path('votar/', VotoUpsertView.as_view(), name='voto-upsert'),
-    
-    # Favoritos
     path('favoritos/', FavoritoListView.as_view(), name='favorito-list'),
     path('favoritos/toggle/', FavoritoToggleView.as_view(), name='favorito-toggle'),
+
+    # Consultas de Datos
+    path('mis-votos/', VotoListView.as_view(), name='mis-votos'),
+    path('votos/resumen/<str:tipo>/<int:pk>/', VotoResumenView.as_view(), name='voto-resumen'),
 ]

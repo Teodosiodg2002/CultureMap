@@ -18,40 +18,87 @@ def index_eventos(request):
     })
 
 def detalle_lugar(request, pk):
-    # 1. Obtener Lugar
     lugar = ApiClient.get_lugares(pk)
     if not lugar:
         raise Http404("Lugar no encontrado")
 
-    # 2. Gestionar Comentario (POST existente)
+    # 1. GESTIÓN DE COMENTARIOS (POST)
     if request.method == 'POST':
         texto = request.POST.get('comentario')
         token = request.session.get('access_token')
         if not token: return redirect('login')
         
         if texto:
-            url = f"{settings.API_INTERACCIONES_URL}/comentarios/{pk}/"
-            ApiClient.post(url, {'texto': texto}, token)
+            ApiClient.post(f"{settings.API_INTERACCIONES_URL}/comentarios/lugar/{pk}/", {'texto': texto}, token)
         return redirect('detalle_lugar', pk=pk)
 
-    # 3. INTERACCIONES: Verificar si es Favorito
+    # 2. DATOS DE INTERACCIÓN (Lectura)
     es_favorito = False
+    mi_voto = 0
     token = request.session.get('access_token')
-    if token:
-        # Obtenemos la lista de IDs favoritos del usuario [1, 5, 20...]
-        mis_favoritos = ApiClient.get_mis_favoritos(token)
-        # Comprobamos si EL lUGAR ACTUAL está en esa lista
-        # (Asegúrate de convertir a entero por si acaso)
-        if int(pk) in mis_favoritos:
-            es_favorito = True
 
-    # 4. Renderizar
+    if token:
+        # A. Verificar Favorito
+        favs = ApiClient.get_mis_favoritos(token)
+        if int(pk) in favs.get('lugares', []):
+            es_favorito = True
+        
+        # B. Verificar Mi Voto (Para pintar mis estrellas)
+        mis_votos = ApiClient.get_mis_votos(token)
+        mi_voto = mis_votos['lugares'].get(int(pk), 0)
+
+    # 3. PUNTUACIÓN GLOBAL (Media de todos)
+    puntuacion = ApiClient.get_resumen_votos(pk, tipo='lugar')
+
     return render(request, 'lugares/detalle_lugar.html', {
         'lugar': lugar,
-        'comentarios': ApiClient.get_comentarios(pk),
-        'es_favorito': es_favorito 
+        'comentarios': ApiClient.get_comentarios(pk, tipo='lugar'),
+        'es_favorito': es_favorito,
+        'mi_voto': mi_voto,      # Lo que yo voté (ej: 4)
+        'puntuacion': puntuacion # La media global (ej: {'media': 4.5, 'total': 12})
     })
+    
+def detalle_evento(request, pk):
+    evento = ApiClient.get_eventos(pk)
+    if not evento:
+        raise Http404("Evento no encontrado")
 
+    # 1. GESTIÓN DE COMENTARIOS (POST)
+    if request.method == 'POST':
+        texto = request.POST.get('comentario')
+        token = request.session.get('access_token')
+        if not token: return redirect('login')
+        
+        if texto:
+            ApiClient.post(f"{settings.API_INTERACCIONES_URL}/comentarios/evento/{pk}/", {'texto': texto}, token)
+        return redirect('detalle_evento', pk=pk)
+
+    # 2. DATOS DE INTERACCIÓN
+    es_favorito = False
+    mi_voto = 0
+    token = request.session.get('access_token')
+
+    if token:
+        # A. Verificar Favorito
+        favs = ApiClient.get_mis_favoritos(token)
+        if int(pk) in favs.get('eventos', []):
+            es_favorito = True
+            
+        # B. Verificar Mi Voto
+        mis_votos = ApiClient.get_mis_votos(token)
+        mi_voto = mis_votos['eventos'].get(int(pk), 0)
+
+    # 3. PUNTUACIÓN GLOBAL
+    puntuacion = ApiClient.get_resumen_votos(pk, tipo='evento')
+
+    return render(request, 'lugares/detalle_evento.html', {
+        'evento': evento,
+        'comentarios': ApiClient.get_comentarios(pk, tipo='evento'),
+        'es_favorito': es_favorito,
+        'mi_voto': mi_voto,
+        'puntuacion': puntuacion
+    })
+    
 # --- GESTIÓN DE USUARIOS (LOGIN/REGISTER) ---
 
 def login_view(request):
@@ -204,23 +251,28 @@ def gestionar_recurso(request, tipo, pk, accion):
     
     return redirect('dashboard')
 
-def accion_favorito(request, pk):
-    """Maneja el clic en el corazón"""
+def accion_favorito(request, tipo, pk):
+    """Maneja el clic en el corazón para Lugares O Eventos"""
     if request.method == 'POST':
         token = request.session.get('access_token')
         if not token: return redirect('login')
         
-        ApiClient.toggle_favorito(pk, token)
+        # tipo vendrá como 'lugar' o 'evento' desde la URL
+        ApiClient.toggle_favorito(pk, tipo, token)
         
+    # Redirección dinámica según el tipo
+    if tipo == 'evento':
+        return redirect('detalle_evento', pk=pk)
     return redirect('detalle_lugar', pk=pk)
 
-def accion_votar(request, pk, valor):
-    """Maneja el clic en Upvote (1) o Downvote (-1)"""
+def accion_votar(request, tipo, pk, valor):
+    """Maneja el clic en las Estrellas (1-5)"""
     if request.method == 'POST':
         token = request.session.get('access_token')
         if not token: return redirect('login')
         
-        # valor viene como string '1' o '-1' desde la URL
-        ApiClient.enviar_voto(pk, int(valor), token)
+        ApiClient.enviar_voto(pk, tipo, int(valor), token)
         
+    if tipo == 'evento':
+        return redirect('detalle_evento', pk=pk)
     return redirect('detalle_lugar', pk=pk)

@@ -6,7 +6,6 @@
 
 <style>
   /* Truco CSS: Cambia el color del marcador rotando el tono (Hue) */
-  /* 140deg convierte el azul en rojo/rosado */
   img.icono-evento {
     filter: hue-rotate(140deg);
   }
@@ -75,7 +74,7 @@
         </div>
         <div class="list-group list-group-flush">
         {% for evento in eventos %}
-          <div class="list-group-item list-group-item-action p-3">
+          <a href="{% url 'detalle_evento' evento.id %}" class="list-group-item list-group-item-action p-3">
             <div class="d-flex w-100 justify-content-between align-items-center mb-1">
               <h5 class="mb-0 text-danger">{{ evento.nombre }}</h5>
               <span class="badge bg-danger rounded-pill">
@@ -83,8 +82,8 @@
               </span>
             </div>
             <p class="mb-1 text-secondary">{{ evento.descripcion|truncatewords:15 }}</p>
-            <small class="text-muted"><i class="bi bi-geo-alt-fill text-danger"></i> Ver en el mapa (Pin Rojo)</small>
-          </div>
+            <small class="text-muted"><i class="bi bi-geo-alt-fill text-danger"></i> Ver detalles</small>
+          </a>
         {% empty %}
           <div class="list-group-item text-center text-muted py-4">
             No hay eventos próximos programados.
@@ -122,14 +121,14 @@
 <script>
   document.addEventListener('DOMContentLoaded', function () {
 
-      // 1. Inicializar mapa centrado en Granada
+      // 1. Inicializar mapa
       var map = L.map('map').setView([37.1773, -3.5986], 13);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© OpenStreetMap contributors'
       }).addTo(map);
 
-      // 2. Definir el Icono ROJO (para eventos)
+      // 2. Icono ROJO
       var redIcon = new L.Icon({
           iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
           shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
@@ -137,10 +136,10 @@
           iconAnchor: [12, 41],
           popupAnchor: [1, -34],
           shadowSize: [41, 41],
-          className: 'icono-evento' // <--- Esta clase aplica el filtro de color rojo
+          className: 'icono-evento'
       });
 
-      // 3. Pintar LUGARES (Azul por defecto)
+      // 3. LUGARES (Azul)
       {% for lugar in lugares %}
           {% if lugar.lat and lugar.lng %}
               L.marker([{{ lugar.lat }}, {{ lugar.lng }}])
@@ -155,14 +154,14 @@
           {% endif %}
       {% endfor %}
 
-      // 4. Pintar EVENTOS (Rojo)
+      // 4. EVENTOS (Rojo) - CORREGIDO EL ENLACE POPUP
       {% for evento in eventos %}
           {% if evento.lat and evento.lng %}
               L.marker([{{ evento.lat }}, {{ evento.lng }}], {icon: redIcon})
                .addTo(map)
                .bindPopup(`
                  <div class="text-center">
-                    <h6 class="text-danger mb-1">📅 {{ evento.nombre|escapejs }}</h6>
+                    <h6 class="text-danger mb-1">📅 <a href="{% url 'detalle_evento' evento.id %}" class="text-decoration-none text-danger">{{ evento.nombre|escapejs }}</a></h6>
                     <span class="badge bg-danger">{{ evento.fecha_inicio|slice:":10" }}</span><br>
                     <small class="text-muted">${"{{ evento.descripcion|escapejs }}".substring(0, 50)}...</small>
                  </div>

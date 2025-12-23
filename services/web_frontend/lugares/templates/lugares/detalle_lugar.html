@@ -8,9 +8,26 @@
     
     <div class="card shadow-sm mb-5">
         <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h1 class="card-title text-primary mb-0">{{ lugar.nombre }}</h1>
-                <span class="badge bg-info text-dark fs-6">{{ lugar.categoria }}</span>
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h1 class="card-title text-primary mb-0">{{ lugar.nombre }}</h1>
+                    <span class="badge bg-info text-dark mt-1">{{ lugar.categoria }}</span>
+                </div>
+                
+                <div class="text-center ms-3">
+                    <div class="bg-light border rounded p-2 px-3">
+                        <h2 class="h1 fw-bold text-primary mb-0">
+                            {% if puntuacion.media > 0 %}{{ puntuacion.media }}{% else %}-{% endif %}
+                        </h2>
+                        <div class="small text-muted text-nowrap">
+                            {% if puntuacion.total > 0 %}
+                                <i class="bi bi-star-fill text-warning"></i> {{ puntuacion.total }} votos
+                            {% else %}
+                                Sin votos
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <p class="lead">{{ lugar.descripcion }}</p>
@@ -21,10 +38,11 @@
             </div>
 
             <div class="d-flex align-items-center gap-2 border-top pt-3">
+                
                 {% if request.session.access_token %}
-                    <form action="{% url 'accion_favorito' lugar.id %}" method="POST">
+                    <form action="{% url 'accion_favorito' 'lugar' lugar.id %}" method="POST">
                         {% csrf_token %}
-                        <button type="submit" class="btn {% if es_favorito %}btn-danger{% else %}btn-outline-danger{% endif %}" title="{% if es_favorito %}Quitar de favoritos{% else %}Añadir a favoritos{% endif %}">
+                        <button type="submit" class="btn {% if es_favorito %}btn-danger{% else %}btn-outline-danger{% endif %}" title="Favorito">
                             <i class="bi {% if es_favorito %}bi-heart-fill{% else %}bi-heart{% endif %}"></i> 
                             {% if es_favorito %}Favorito{% else %}Guardar{% endif %}
                         </button>
@@ -32,27 +50,31 @@
 
                     <div class="vr mx-2"></div>
 
-                    <span class="text-muted small me-2">¿Te gusta?</span>
-                    <form action="{% url 'accion_votar' lugar.id '1' %}" method="POST" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-success btn-sm" title="Me gusta">
-                            <i class="bi bi-hand-thumbs-up-fill"></i>
-                        </button>
-                    </form>
-                    <form action="{% url 'accion_votar' lugar.id '-1' %}" method="POST" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-secondary btn-sm" title="No me gusta">
-                            <i class="bi bi-hand-thumbs-down-fill"></i>
-                        </button>
-                    </form>
+                    <span class="text-muted small me-1">Tu voto:</span>
+                    <div class="d-flex">
+                        {% for i in "12345" %}
+                            {% with rating=forloop.counter %}
+                            <form action="{% url 'accion_votar' 'lugar' lugar.id rating %}" method="POST" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-link p-0 text-decoration-none fs-4" title="Votar {{ rating }}">
+                                    {% if rating <= mi_voto %}
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                    {% else %}
+                                        <i class="bi bi-star text-secondary opacity-25"></i>
+                                    {% endif %}
+                                </button>
+                            </form>
+                            {% endwith %}
+                        {% endfor %}
+                    </div>
 
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-outline-danger" title="Inicia sesión para guardar">
+                    <a href="{% url 'login' %}" class="btn btn-outline-danger">
                         <i class="bi bi-heart"></i> Guardar
                     </a>
                     <div class="vr mx-2"></div>
                     <a href="{% url 'login' %}" class="btn btn-outline-secondary btn-sm">
-                        <i class="bi bi-hand-thumbs-up"></i>
+                        <i class="bi bi-star"></i> Valorar
                     </a>
                 {% endif %}
                 
@@ -62,7 +84,7 @@
                     </a>
                 </div>
             </div>
-            </div>
+        </div>
     </div>
 
     <div class="row">
@@ -105,13 +127,11 @@
                 {% empty %}
                     <div class="alert alert-light text-center border">
                         <i class="bi bi-chat-square-text fs-1 text-muted"></i>
-                        <p class="mt-2">Aún no hay comentarios. ¡Sé el primero!</p>
+                        <p class="mt-2">Aún no hay comentarios.</p>
                     </div>
                 {% endfor %}
             </div>
-
         </div>
     </div>
-
 </div>
 {% endblock %}
