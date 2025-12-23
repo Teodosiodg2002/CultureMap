@@ -20,9 +20,6 @@ class ApiClient:
                 return data
             except ValueError:
                 return []
-        
-        # Debugging silencioso (puedes descomentar si hay errores)
-        # print(f"⚠️ ERROR API ({response.status_code}): {response.url}")
         return []
 
     @staticmethod
@@ -70,29 +67,69 @@ class ApiClient:
         return ApiClient.get(endpoint, token=token)
 
     @staticmethod
-    def get_comentarios(lugar_id):
-        # Los comentarios son públicos, no requieren token obligatoriamente
-        url = f"{settings.API_INTERACCIONES_URL}/comentarios/{lugar_id}/"
+    def get_comentarios(recurso_id, tipo='lugar'):
+        # tipo puede ser 'lugar' o 'evento'
+        url = f"{settings.API_INTERACCIONES_URL}/comentarios/{tipo}/{recurso_id}/"
         return ApiClient.get(url)
 
-    # --- Métodos de Negocio: INTERACCIONES (NUEVO) ---
+    # --- Métodos de Negocio: INTERACCIONES ---
 
     @staticmethod
     def get_mis_favoritos(token):
-        """Obtiene la lista de IDs de lugares favoritos del usuario."""
+        """Devuelve un dict con listas de IDs: {'lugares': [], 'eventos': []}"""
         url = f"{settings.API_INTERACCIONES_URL}/favoritos/"
         favoritos = ApiClient.get(url, token=token)
-        # Devolvemos solo una lista de IDs para facilitar la comprobación en el template: [1, 5, 8]
+        
+        resultado = {'lugares': [], 'eventos': []}
         if isinstance(favoritos, list):
-            return [f['lugar_id'] for f in favoritos if 'lugar_id' in f]
-        return []
+            for f in favoritos:
+                if f.get('lugar_id'):
+                    resultado['lugares'].append(f['lugar_id'])
+                elif f.get('evento_id'):
+                    resultado['eventos'].append(f['evento_id'])
+        return resultado
 
     @staticmethod
-    def toggle_favorito(lugar_id, token):
+    def toggle_favorito(recurso_id, tipo, token):
         url = f"{settings.API_INTERACCIONES_URL}/favoritos/toggle/"
-        return ApiClient.post(url, data={'lugar_id': lugar_id}, token=token)
+        data = {}
+        if tipo == 'lugar': data['lugar_id'] = recurso_id
+        else: data['evento_id'] = recurso_id
+        
+        return ApiClient.post(url, data=data, token=token)
 
     @staticmethod
-    def enviar_voto(lugar_id, valor, token):
+    def enviar_voto(recurso_id, tipo, valor, token):
         url = f"{settings.API_INTERACCIONES_URL}/votar/"
-        return ApiClient.post(url, data={'lugar_id': lugar_id, 'valor': valor}, token=token)
+        data = {'valor': valor}
+        if tipo == 'lugar': data['lugar_id'] = recurso_id
+        else: data['evento_id'] = recurso_id
+        
+        return ApiClient.post(url, data=data, token=token)
+
+    # --- MÉTODOS NUEVOS QUE FALTABAN ---
+
+    @staticmethod
+    def get_mis_votos(token):
+        """
+        Devuelve un diccionario mapeando ID -> Valor.
+        Ejemplo: {'lugares': {1: 5, 3: 4}, 'eventos': {10: 5}}
+        """
+        url = f"{settings.API_INTERACCIONES_URL}/mis-votos/"
+        votos = ApiClient.get(url, token=token)
+        
+        resultado = {'lugares': {}, 'eventos': {}}
+        if isinstance(votos, list):
+            for v in votos:
+                # v es {'lugar_id': 1, 'valor': 5, ...}
+                if v.get('lugar_id'):
+                    resultado['lugares'][v['lugar_id']] = v['valor']
+                elif v.get('evento_id'):
+                    resultado['eventos'][v['evento_id']] = v['valor']
+        return resultado
+
+    @staticmethod
+    def get_resumen_votos(recurso_id, tipo):
+        """Devuelve {'media': 4.5, 'total': 10}"""
+        url = f"{settings.API_INTERACCIONES_URL}/votos/resumen/{tipo}/{recurso_id}/"
+        return ApiClient.get(url)
