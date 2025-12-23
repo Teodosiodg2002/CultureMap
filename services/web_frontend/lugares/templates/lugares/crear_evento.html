@@ -1,5 +1,5 @@
 {% extends 'lugares/base.html' %}
-{% block title %}Publicar Evento{% endblock %}
+{% block title %}Publicar Evento - CultureMap{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
@@ -9,46 +9,134 @@
                 <h4 class="mb-0">📅 Publicar Nuevo Evento</h4>
             </div>
             <div class="card-body">
-                {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-danger small text-uppercase">1. Ubicación del Evento</label>
+                    
+                    <div class="input-group mb-2">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-danger"></i></span>
+                        <input type="text" id="address-input" class="form-control border-start-0" placeholder="Buscar dirección (Ej: Teatro Real, Madrid)">
+                        <button class="btn btn-outline-danger" type="button" onclick="buscarDireccion()">Buscar</button>
+                    </div>
+                    <small class="text-muted d-block mb-3">Busca el sitio o haz clic en el mapa para marcar dónde será el evento.</small>
+
+                    <div id="map" class="rounded border border-danger-subtle" style="height: 350px; width: 100%;"></div>
+                </div>
+
+                <hr class="text-danger opacity-25">
 
                 <form method="post">
                     {% csrf_token %}
+                    
                     <div class="mb-3">
-                        <label class="form-label">Nombre del Evento</label>
-                        <input type="text" name="nombre" class="form-control" required>
+                        <label class="form-label fw-bold text-danger small text-uppercase">2. Detalles</label>
+                        <input type="text" name="nombre" class="form-control" placeholder="Nombre del Evento" required>
                     </div>
+
                     <div class="mb-3">
                         <label class="form-label">Fecha y Hora de Inicio</label>
                         <input type="datetime-local" name="fecha_inicio" class="form-control" required>
                     </div>
+
                     <div class="mb-3">
                         <label class="form-label">Descripción</label>
-                        <textarea name="descripcion" class="form-control" rows="3" required></textarea>
+                        <textarea name="descripcion" class="form-control" rows="3" placeholder="Detalles del evento..." required></textarea>
                     </div>
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Latitud</label>
-                            <input type="number" step="any" name="lat" class="form-control" placeholder="37.17" required>
+                            <label class="form-label small text-muted">Latitud</label>
+                            <input type="number" step="any" name="lat" id="lat" class="form-control bg-light" readonly required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Longitud</label>
-                            <input type="number" step="any" name="lng" class="form-control" placeholder="-3.59" required>
+                            <label class="form-label small text-muted">Longitud</label>
+                            <input type="number" step="any" name="lng" id="lng" class="form-control bg-light" readonly required>
                         </div>
                     </div>
-                    <div class="mb-3">
+
+                    <div class="mb-4">
                         <label class="form-label">Categoría</label>
                         <select name="categoria" class="form-select">
                             <option value="concierto">Concierto</option>
                             <option value="teatro">Teatro</option>
                             <option value="exposicion">Exposición</option>
                             <option value="fiesta">Fiesta</option>
+                            <option value="conferencia">Conferencia</option>
                             <option value="otros">Otros</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-danger w-100">Publicar Evento</button>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg shadow-sm">Publicar Evento</button>
+                        <a href="{% url 'index_eventos' %}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 1. Inicializar Mapa
+    var map = L.map('map').setView([40.4167, -3.7033], 6);
+    var marker = null;
+
+    // 2. Capa OSM
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // 3. Función setLocation
+    function setLocation(lat, lng) {
+        document.getElementById('lat').value = lat;
+        document.getElementById('lng').value = lng;
+
+        if (marker) map.removeLayer(marker);
+        marker = L.marker([lat, lng]).addTo(map);
+    }
+
+    // 4. Click en mapa
+    map.on('click', function(e) {
+        setLocation(e.latlng.lat, e.latlng.lng);
+    });
+
+    // 5. Buscador (Nominatim)
+    function buscarDireccion() {
+        var query = document.getElementById('address-input').value;
+        if (!query) return;
+
+        var btn = document.querySelector('button[onclick="buscarDireccion()"]');
+        var originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.disabled = true;
+
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    var lat = parseFloat(data[0].lat);
+                    var lon = parseFloat(data[0].lon);
+                    map.setView([lat, lon], 16);
+                    setLocation(lat, lon);
+                } else {
+                    alert("No se encontró esa dirección.");
+                }
+            })
+            .catch(error => { console.error(error); alert("Error de conexión."); })
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+    }
+
+    // Enter para buscar
+    document.getElementById('address-input').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') buscarDireccion();
+    });
+</script>
 {% endblock %}

@@ -15,6 +15,19 @@
                     <div class="alert alert-danger">{{ error }}</div>
                 {% endif %}
 
+                <div class="mb-3">
+                    <label class="form-label fw-bold">1. Busca la ubicación en el mapa:</label>
+                    <div class="input-group">
+                        <input type="text" id="address-input" class="form-control" placeholder="Ej: Plaza Mayor, Madrid">
+                        <button class="btn btn-outline-primary" type="button" onclick="buscarDireccion()">
+                            <i class="fa-solid fa-magnifying-glass"></i> Buscar
+                        </button>
+                    </div>
+                    <small class="text-muted">Busca una calle o ciudad y haz clic en el mapa para marcar el punto exacto.</small>
+                </div>
+
+                <div id="map" class="map-container mb-4"></div>
+
                 <form method="post">
                     {% csrf_token %}
                     
@@ -31,11 +44,11 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Latitud</label>
-                            <input type="number" step="any" name="lat" class="form-control" placeholder="Ej: 37.17" required>
+                            <input type="number" step="any" name="lat" id="lat" class="form-control bg-light" required readonly>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Longitud</label>
-                            <input type="number" step="any" name="lng" class="form-control" placeholder="Ej: -3.59" required>
+                            <input type="number" step="any" name="lng" id="lng" class="form-control bg-light" required readonly>
                         </div>
                     </div>
 
@@ -47,6 +60,9 @@
                             <option value="bar">Bar</option>
                             <option value="plaza">Plaza</option>
                             <option value="monumento">Monumento</option>
+                            <option value="arte_urbano">Arte Urbano</option>
+                            <option value="galeria">Galería</option>
+                            <option value="tienda">Tienda</option>
                         </select>
                     </div>
 
@@ -56,4 +72,61 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 1. Inicializar el Mapa (Centrado en España por defecto)
+    var map = L.map('map').setView([40.4167, -3.7033], 6);
+    var marker = null;
+
+    // 2. Cargar capa de OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // 3. Función para poner la chincheta y actualizar inputs
+    function setLocation(lat, lng) {
+        // Actualizar inputs
+        document.getElementById('lat').value = lat;
+        document.getElementById('lng').value = lng;
+
+        // Mover chincheta
+        if (marker) {
+            map.removeLayer(marker);
+        }
+        marker = L.marker([lat, lng]).addTo(map);
+    }
+
+    // 4. Evento: Clic en el mapa
+    map.on('click', function(e) {
+        setLocation(e.latlng.lat, e.latlng.lng);
+    });
+
+    // 5. Función: Buscar dirección (Nominatim API)
+    function buscarDireccion() {
+        var query = document.getElementById('address-input').value;
+        if (!query) return;
+
+        // Llamada a la API de Nominatim (OpenStreetMap)
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    var lat = parseFloat(data[0].lat);
+                    var lon = parseFloat(data[0].lon);
+                    
+                    // Centrar mapa y poner chincheta
+                    map.setView([lat, lon], 16);
+                    setLocation(lat, lon);
+                } else {
+                    alert("Dirección no encontrada. Prueba con algo más específico.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Error al conectar con el servicio de mapas.");
+            });
+    }
+</script>
 {% endblock %}
