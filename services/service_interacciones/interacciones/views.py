@@ -1,56 +1,29 @@
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, views
 from rest_framework.response import Response
-from .models import Comentario, Voto
-from .serializers import ComentarioSerializer, VotoSerializer
+from .models import Comentario, Voto, Favorito
+from .serializers import ComentarioSerializer, VotoSerializer, FavoritoSerializer
 
-# --- Vista para Comentarios (Listar y Crear) ---
+# --- COMENTARIOS ---
 
 class ComentarioListCreateView(generics.ListCreateAPIView):
-    """
-    API View para:
-    - GET: Listar todos los comentarios de un lugar específico.
-    - POST: Crear un nuevo comentario para un lugar específico.
-
-    La URL contendrá el ID del lugar (ej: /api/lugar/5/comentarios/)
-    """
     serializer_class = ComentarioSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        """
-        Filtra los comentarios para que solo devuelva
-        los del 'lugar_id' especificado en la URL.
-        """
-        lugar_id = self.kwargs['lugar_id']
-        return Comentario.objects.filter(lugar_id=lugar_id).order_by('-creado_en')
+        return Comentario.objects.filter(lugar_id=self.kwargs['lugar_id']).order_by('-creado_en')
 
     def perform_create(self, serializer):
-        """
-        Asigna automáticamente el 'usuario_id' (del token)
-        y el 'lugar_id' (de la URL) al crear un comentario.
-        """
-        lugar_id = self.kwargs['lugar_id']
-        serializer.save(usuario_id=self.request.user.id, lugar_id=lugar_id)
+        serializer.save(usuario_id=self.request.user.id, lugar_id=self.kwargs['lugar_id'])
 
 
-# --- Vista para Votos (Crear y Actualizar) ---
+# --- VOTOS ---
 
-class VotoCreateUpdateView(generics.CreateAPIView):
-    """
-    API View para:
-    - POST: Crear o Actualizar un voto para un lugar.
-
-    La URL será genérica (ej: /api/interacciones/votar/)
-    El 'lugar_id' y el 'valor' vendrán en el body del JSON.
-    """
+class VotoUpsertView(generics.GenericAPIView):
+    """Crea o actualiza un voto (Upsert)"""
     serializer_class = VotoSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def create(self, request, *args, **kwargs):
-        """
-        Sobreescribimos el método 'create' para implementar
-        la lógica de "votar una sola vez" (Upsert).
-        """
+    def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -58,10 +31,42 @@ class VotoCreateUpdateView(generics.CreateAPIView):
         valor = serializer.validated_data['valor']
 
         voto, created = Voto.objects.update_or_create(
-            usuario_id=request.user.id,  
-            lugar_id=lugar_id,            
-            defaults={'valor': valor}  
+            usuario_id=request.user.id,
+            lugar_id=lugar_id,
+            defaults={'valor': valor}
         )
-
+        
         status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
         return Response(VotoSerializer(voto).data, status=status_code)
+
+
+# --- FAVORITOS ---
+
+class FavoritoToggleView(views.APIView):
+    """Acción de 'Me gusta' / 'Ya no me gusta' (Toggle)"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        lugar_id = request.data.get('lugar_id')
+        if not lugar_id:
+            return Response({'error': 'lugar_id requerido'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Si existe, lo borramos (Ya no me gusta). Si no, lo creamos.
+        favorito, created = Favorito.objects.get_or_create(
+            usuario_id=request.user.id,
+            lugar_id=lugar_id
+        )
+
+        if not created:
+            favorito.delete()
+            return Response({'status': 'eliminado', 'lugar_id': lugar_id}, status=status.HTTP_200_OK)
+        
+        return Response({'status': 'creado', 'lugar_id': lugar_id}, status=status.HTTP_201_CREATED)
+
+class FavoritoListView(generics.ListAPIView):
+    """Lista todos los favoritos del usuario actual"""
+    serializer_class = FavoritoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Favorito.objects.filter(usuario_id=self.request.user.id)
