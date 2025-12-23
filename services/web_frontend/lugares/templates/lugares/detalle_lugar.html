@@ -15,15 +15,54 @@
             
             <p class="lead">{{ lugar.descripcion }}</p>
             
-            <div class="text-muted mt-3">
+            <div class="text-muted mt-3 mb-4">
                 <i class="bi bi-geo-alt-fill"></i> 
                 Lat: {{ lugar.lat }}, Lng: {{ lugar.lng }}
             </div>
-            
-            <a href="{% url 'index_lugares' %}" class="btn btn-outline-secondary mt-3">
-                &larr; Volver al mapa
-            </a>
-        </div>
+
+            <div class="d-flex align-items-center gap-2 border-top pt-3">
+                {% if request.session.access_token %}
+                    <form action="{% url 'accion_favorito' lugar.id %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn {% if es_favorito %}btn-danger{% else %}btn-outline-danger{% endif %}" title="{% if es_favorito %}Quitar de favoritos{% else %}Añadir a favoritos{% endif %}">
+                            <i class="bi {% if es_favorito %}bi-heart-fill{% else %}bi-heart{% endif %}"></i> 
+                            {% if es_favorito %}Favorito{% else %}Guardar{% endif %}
+                        </button>
+                    </form>
+
+                    <div class="vr mx-2"></div>
+
+                    <span class="text-muted small me-2">¿Te gusta?</span>
+                    <form action="{% url 'accion_votar' lugar.id '1' %}" method="POST" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-success btn-sm" title="Me gusta">
+                            <i class="bi bi-hand-thumbs-up-fill"></i>
+                        </button>
+                    </form>
+                    <form action="{% url 'accion_votar' lugar.id '-1' %}" method="POST" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-secondary btn-sm" title="No me gusta">
+                            <i class="bi bi-hand-thumbs-down-fill"></i>
+                        </button>
+                    </form>
+
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-outline-danger" title="Inicia sesión para guardar">
+                        <i class="bi bi-heart"></i> Guardar
+                    </a>
+                    <div class="vr mx-2"></div>
+                    <a href="{% url 'login' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-hand-thumbs-up"></i>
+                    </a>
+                {% endif %}
+                
+                <div class="ms-auto">
+                    <a href="{% url 'index_lugares' %}" class="btn btn-link text-decoration-none text-secondary">
+                        &larr; Volver al mapa
+                    </a>
+                </div>
+            </div>
+            </div>
     </div>
 
     <div class="row">
