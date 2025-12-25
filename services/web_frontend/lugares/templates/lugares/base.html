@@ -51,9 +51,15 @@
               <a class="nav-link" href="{% url 'index_lugares' %}">Explorar</a>
             </li>
             
-            {% if request.session.access_token %}
             <li class="nav-item">
-              <a class="nav-link active fw-semibold" href="{% url 'seleccionar_creacion' %}">
+                <a class="nav-link text-warning fw-bold" href="{% url 'ver_ranking' %}">
+                    <i class="bi bi-trophy-fill"></i> Ranking
+                </a>
+            </li>
+
+            {% if request.session.access_token %}
+            <li class="nav-item ms-lg-2">
+              <a class="nav-link active fw-semibold btn btn-outline-secondary border-0 text-start" href="{% url 'seleccionar_creacion' %}">
                 <i class="bi bi-plus-circle"></i> Publicar
               </a>
             </li>
@@ -70,6 +76,24 @@
                         {% endif %}
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
+                        {% if request.session.user_id %}
+                        <li>
+                            <a class="dropdown-item" href="{% url 'ver_perfil' request.session.user_id %}">
+                                <i class="bi bi-person-badge"></i> Mi Perfil
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        {% endif %}
+
+                        {% if request.session.rol == 'admin' or request.session.rol == 'organizador' %}
+                        <li>
+                            <a class="dropdown-item" href="{% url 'dashboard' %}">
+                                <i class="bi bi-speedometer2"></i> Gestión
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        {% endif %}
+
                         <li>
                             <a class="dropdown-item text-danger" href="{% url 'logout' %}">
                                 <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
