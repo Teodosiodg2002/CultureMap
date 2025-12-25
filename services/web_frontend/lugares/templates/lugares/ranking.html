@@ -1,0 +1,49 @@
+{% extends 'lugares/base.html' %}
+{% block title %}Ranking - CultureMap{% endblock %}
+
+{% block content %}
+<div class="container py-5 text-center">
+    <h1 class="mb-4 text-warning fw-bold"><i class="bi bi-trophy-fill"></i> Ranking de Exploradores</h1>
+    <p class="lead mb-5">Los usuarios más activos de Granada</p>
+    
+    <div class="card shadow border-0 mx-auto" style="max-width: 800px;">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="py-3">Posición</th>
+                        <th>Usuario</th>
+                        <th>Nivel</th>
+                        <th>Puntos</th>
+                        <th>Perfil</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in ranking %}
+                    <tr class="{% if forloop.counter == 1 %}table-warning fw-bold{% endif %}">
+                        <td>
+                            {% if forloop.counter == 1 %}🥇 1º{% elif forloop.counter == 2 %}🥈 2º{% elif forloop.counter == 3 %}🥉 3º{% else %}{{ forloop.counter }}º{% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center justify-content-center gap-2">
+                                <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center fw-bold" style="width: 35px; height: 35px;">
+                                    {{ user.username|slice:":1"|upper }}
+                                </div>
+                                {{ user.username }}
+                            </div>
+                        </td>
+                        <td><span class="badge bg-secondary">{{ user.nivel }}</span></td>
+                        <td class="fw-bold text-primary">{{ user.puntos }} pts</td>
+                        <td>
+                            <a href="{% url 'ver_perfil' user.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="py-4 text-muted">Aún no hay usuarios en el ranking.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

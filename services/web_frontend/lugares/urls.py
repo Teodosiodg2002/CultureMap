@@ -25,4 +25,8 @@ urlpatterns = [
     # INTERACCIONES (Ahora aceptan 'tipo')
     path("favorito/<str:tipo>/<int:pk>/", views.accion_favorito, name="accion_favorito"),
     path("votar/<str:tipo>/<int:pk>/<int:valor>/", views.accion_votar, name="accion_votar"),
+    
+    #RANKING Y PERFILES PÚBLICOS
+    path("ranking/", views.ver_ranking, name="ver_ranking"),
+    path("perfil/<int:pk>/", views.ver_perfil, name="ver_perfil"),
 ]

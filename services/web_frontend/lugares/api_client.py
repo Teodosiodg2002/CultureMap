@@ -22,6 +22,8 @@ class ApiClient:
                 return []
         return []
 
+    # --- MÉTODOS HTTP GENÉRICOS ---
+
     @staticmethod
     def get(url, token=None, params=None):
         try:
@@ -33,14 +35,31 @@ class ApiClient:
     @staticmethod
     def post(url, data=None, token=None):
         try:
-            return requests.post(url, json=data, headers=ApiClient._get_headers(token), timeout=5)
+            response = requests.post(url, json=data, headers=ApiClient._get_headers(token), timeout=5)
+            # CORRECCIÓN LOGIN: Devolvemos el JSON si es 200/201
+            if response.status_code in [200, 201]:
+                return response.json()
+            return None
         except requests.RequestException:
             return None
 
     @staticmethod
     def put(url, data=None, token=None):
         try:
-            return requests.put(url, json=data, headers=ApiClient._get_headers(token), timeout=5)
+            response = requests.put(url, json=data, headers=ApiClient._get_headers(token), timeout=5)
+            if response.status_code in [200, 201]:
+                return response.json()
+            return None
+        except requests.RequestException:
+            return None
+    
+    @staticmethod
+    def patch(url, data=None, token=None):
+        try:
+            response = requests.patch(url, json=data, headers=ApiClient._get_headers(token), timeout=5)
+            if response.status_code in [200, 201]:
+                return response.json()
+            return None
         except requests.RequestException:
             return None
 
@@ -52,7 +71,7 @@ class ApiClient:
         except requests.RequestException:
             return False
 
-    # --- Métodos de Negocio: LECTURA ---
+    # --- LUGARES Y EVENTOS ---
     
     @staticmethod
     def get_lugares(pk=None, token=None):
@@ -66,70 +85,76 @@ class ApiClient:
         if pk: endpoint += f"{pk}/"
         return ApiClient.get(endpoint, token=token)
 
+    # --- INTERACCIONES (Votos, Favoritos, Comentarios) ---
+
     @staticmethod
     def get_comentarios(recurso_id, tipo='lugar'):
-        # tipo puede ser 'lugar' o 'evento'
         url = f"{settings.API_INTERACCIONES_URL}/comentarios/{tipo}/{recurso_id}/"
         return ApiClient.get(url)
 
-    # --- Métodos de Negocio: INTERACCIONES ---
-
     @staticmethod
     def get_mis_favoritos(token):
-        """Devuelve un dict con listas de IDs: {'lugares': [], 'eventos': []}"""
         url = f"{settings.API_INTERACCIONES_URL}/favoritos/"
         favoritos = ApiClient.get(url, token=token)
-        
         resultado = {'lugares': [], 'eventos': []}
         if isinstance(favoritos, list):
             for f in favoritos:
-                if f.get('lugar_id'):
-                    resultado['lugares'].append(f['lugar_id'])
-                elif f.get('evento_id'):
-                    resultado['eventos'].append(f['evento_id'])
+                if f.get('lugar_id'): resultado['lugares'].append(f['lugar_id'])
+                elif f.get('evento_id'): resultado['eventos'].append(f['evento_id'])
         return resultado
 
     @staticmethod
     def toggle_favorito(recurso_id, tipo, token):
         url = f"{settings.API_INTERACCIONES_URL}/favoritos/toggle/"
-        data = {}
-        if tipo == 'lugar': data['lugar_id'] = recurso_id
-        else: data['evento_id'] = recurso_id
-        
+        data = {'lugar_id': recurso_id} if tipo == 'lugar' else {'evento_id': recurso_id}
         return ApiClient.post(url, data=data, token=token)
 
     @staticmethod
     def enviar_voto(recurso_id, tipo, valor, token):
         url = f"{settings.API_INTERACCIONES_URL}/votar/"
-        data = {'valor': valor}
-        if tipo == 'lugar': data['lugar_id'] = recurso_id
-        else: data['evento_id'] = recurso_id
-        
+        data = {'valor': valor, 'lugar_id' if tipo == 'lugar' else 'evento_id': recurso_id}
         return ApiClient.post(url, data=data, token=token)
-
-    # --- MÉTODOS NUEVOS QUE FALTABAN ---
 
     @staticmethod
     def get_mis_votos(token):
-        """
-        Devuelve un diccionario mapeando ID -> Valor.
-        Ejemplo: {'lugares': {1: 5, 3: 4}, 'eventos': {10: 5}}
-        """
         url = f"{settings.API_INTERACCIONES_URL}/mis-votos/"
         votos = ApiClient.get(url, token=token)
-        
         resultado = {'lugares': {}, 'eventos': {}}
         if isinstance(votos, list):
             for v in votos:
-                # v es {'lugar_id': 1, 'valor': 5, ...}
-                if v.get('lugar_id'):
-                    resultado['lugares'][v['lugar_id']] = v['valor']
-                elif v.get('evento_id'):
-                    resultado['eventos'][v['evento_id']] = v['valor']
+                if v.get('lugar_id'): resultado['lugares'][v['lugar_id']] = v['valor']
+                elif v.get('evento_id'): resultado['eventos'][v['evento_id']] = v['valor']
         return resultado
 
     @staticmethod
     def get_resumen_votos(recurso_id, tipo):
-        """Devuelve {'media': 4.5, 'total': 10}"""
         url = f"{settings.API_INTERACCIONES_URL}/votos/resumen/{tipo}/{recurso_id}/"
         return ApiClient.get(url)
+
+    # --- USUARIOS Y GAMIFICACIÓN ---
+
+    @staticmethod
+    def get_me(token):
+        """Obtiene datos del usuario logueado (ID, Rol, Puntos...)"""
+        # IMPORTANTE: Asegúrate de que API_USUARIOS_URL en settings no tenga slash final extra si aquí ponemos /me/
+        # Normalmente API_USUARIOS_URL es http://service-usuarios:8000/api
+        url = f"{settings.API_USUARIOS_URL}/me/"
+        return ApiClient.get(url, token=token)
+
+    @staticmethod
+    def get_perfil_publico(user_id):
+        url = f"{settings.API_USUARIOS_URL}/{user_id}/perfil/"
+
+        # Depende de tu urls.py del backend. Si usaste router, es 'users/'.
+        return ApiClient.get(url)
+
+    @staticmethod
+    def get_ranking():
+        url = f"{settings.API_USUARIOS_URL}/ranking/"
+        return ApiClient.get(url)
+
+    @staticmethod
+    def sumar_puntos(user_id, cantidad, token):
+        url = f"{settings.API_USUARIOS_URL}/{user_id}/puntos/"
+        # Usamos PATCH para actualizar parcialmente
+        return ApiClient.patch(url, data={'puntos': cantidad}, token=token)

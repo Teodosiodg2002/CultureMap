@@ -4,6 +4,10 @@ from django.http import Http404
 import requests
 from .api_client import ApiClient
 
+PUNTOS_CREAR_LUGAR = 50
+PUNTOS_CREAR_EVENTO = 30
+PUNTOS_COMENTAR = 5
+
 # --- VISTAS PÚBLICAS ---
 
 def index_lugares(request):
@@ -102,30 +106,49 @@ def detalle_evento(request, pk):
 # --- GESTIÓN DE USUARIOS (LOGIN/REGISTER) ---
 
 def login_view(request):
-    if request.method == 'GET':
-        return render(request, 'registration/login.html')
+    # Si ya está logueado, fuera
+    if request.session.get('access_token'):
+        return redirect('index_lugares')
 
-    username = request.POST.get('username')
-    password = request.POST.get('password')
-
-    try:
-        response = requests.post(
-            f"{settings.API_USUARIOS_URL}/token/",
-            json={'username': username, 'password': password}, timeout=5
-        )
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
         
-        if response.status_code == 200:
-            data = response.json()
-            request.session['access_token'] = data.get('access')
-            request.session['refresh_token'] = data.get('refresh')
-            request.session['username'] = data.get('username')
-            request.session['rol'] = data.get('rol')
+        print(f"DEBUG LOGIN: Intentando entrar con usuario: {username}")
+
+        # 1. URL del Login
+        url_login = f"{settings.API_USUARIOS_URL}/login/"
+        print(f"DEBUG LOGIN: URL endpoint -> {url_login}")
+        
+        # 2. Llamada a la API
+        auth_data = ApiClient.post(url_login, {
+            "username": username,
+            "password": password
+        })
+        
+        print(f"DEBUG LOGIN: Respuesta del Backend -> {auth_data}")
+
+        if auth_data and "access" in auth_data:
+            print("DEBUG LOGIN: ¡Token recibido! Guardando sesión...")
+            token = auth_data["access"]
+            request.session['access_token'] = token
+            request.session['username'] = username
+            
+            # 3. Obtener Datos de Usuario (ID y Rol)
+            me = ApiClient.get_me(token)
+            print(f"DEBUG LOGIN: Datos de perfil (me) -> {me}")
+            
+            if me:
+                request.session['user_id'] = me.get('id')
+                request.session['rol'] = me.get('rol')
+            
             return redirect('index_lugares')
         else:
-            return render(request, 'registration/login.html', {'error': 'Credenciales inválidas'})
-            
-    except requests.RequestException:
-        return render(request, 'registration/login.html', {'error': 'Servicio no disponible'})
+            print("DEBUG LOGIN: Fallo. Credenciales incorrectas o error de conexión.")
+            return render(request, "lugares/login.html", {"error": "Credenciales inválidas o error de servidor"})
+    
+    return render(request, "lugares/login.html")
+
 
 def logout_view(request):
     request.session.flush()
@@ -170,10 +193,55 @@ def _crear_recurso(request, tipo, url_api, template):
     return render(request, template, {'error': f"Error: {error_msg}"})
 
 def crear_lugar(request):
-    return _crear_recurso(request, 'lugar', f"{settings.API_LUGARES_URL}/lugares/", 'lugares/crear_lugar.html')
+    if request.method == 'POST':
+        token = request.session.get('access_token')
+        user_id = request.session.get('user_id') # Recuperamos el ID
+
+        data = {
+            'nombre': request.POST.get('nombre'),
+            'descripcion': request.POST.get('descripcion'),
+            'lat': float(request.POST.get('lat')),
+            'lng': float(request.POST.get('lng')),
+            'categoria': request.POST.get('categoria'),
+            'usuario_id': user_id  # Enviamos el ID real
+        }
+
+        response = ApiClient.post(f"{settings.API_LUGARES_URL}/lugares/", data, token)
+
+        if response and response.get('id'):
+            # ¡PREMIO! Sumamos puntos
+            ApiClient.sumar_puntos(user_id, PUNTOS_CREAR_LUGAR, token)
+            return redirect('index_lugares')
+        else:
+            return render(request, 'lugares/crear_lugar.html', {'error': 'Error al crear lugar'})
+
+    return render(request, 'lugares/crear_lugar.html')
 
 def crear_evento(request):
-    return _crear_recurso(request, 'evento', f"{settings.API_EVENTOS_URL}/eventos/", 'lugares/crear_evento.html')
+    if request.method == 'POST':
+        token = request.session.get('access_token')
+        user_id = request.session.get('user_id')
+
+        data = {
+            'nombre': request.POST.get('nombre'),
+            'descripcion': request.POST.get('descripcion'),
+            'fecha_inicio': request.POST.get('fecha_inicio'),
+            'lat': float(request.POST.get('lat')),
+            'lng': float(request.POST.get('lng')),
+            'categoria': request.POST.get('categoria'),
+            'usuario_id': user_id
+        }
+
+        response = ApiClient.post(f"{settings.API_EVENTOS_URL}/eventos/", data, token)
+
+        if response and response.get('id'):
+            # ¡PREMIO! Sumamos puntos
+            ApiClient.sumar_puntos(user_id, PUNTOS_CREAR_EVENTO, token)
+            return redirect('index_eventos')
+        else:
+            return render(request, 'lugares/crear_evento.html', {'error': 'Error al crear evento'})
+
+    return render(request, 'lugares/crear_evento.html')
 
 # --- DASHBOARD Y ADMINISTRACIÓN ---
 
@@ -276,3 +344,19 @@ def accion_votar(request, tipo, pk, valor):
     if tipo == 'evento':
         return redirect('detalle_evento', pk=pk)
     return redirect('detalle_lugar', pk=pk)
+
+def ver_ranking(request):
+    ranking = ApiClient.get_ranking()
+    return render(request, 'lugares/ranking.html', {'ranking': ranking})
+
+def ver_perfil(request, pk):
+    print(f"DEBUG PERFIL: Buscando perfil ID: {pk}")
+    
+    perfil = ApiClient.get_perfil_publico(pk)
+    print(f"DEBUG PERFIL: Respuesta recibida: {perfil}")
+
+    if not perfil:
+        print("DEBUG PERFIL: Fallo. Redirigiendo a home...")
+        return redirect('index_lugares')
+        
+    return render(request, 'lugares/perfil_publico.html', {'perfil': perfil})

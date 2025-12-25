@@ -1,0 +1,46 @@
+{% extends 'lugares/base.html' %}
+{% block title %}Perfil de {{ perfil.username }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0 text-center p-4">
+                
+                <div class="mb-3 mx-auto bg-primary text-white rounded-circle d-flex justify-content-center align-items-center shadow fw-bold" style="width: 100px; height: 100px; font-size: 3rem;">
+                    {{ perfil.username|slice:":1"|upper }}
+                </div>
+                
+                <h2 class="fw-bold mb-1">{{ perfil.username }}</h2>
+                <div class="mb-3">
+                    <span class="badge bg-warning text-dark fs-6">{{ perfil.nivel }}</span>
+                    <span class="text-muted ms-2 small">Unido el {{ perfil.date_joined|slice:":10" }}</span>
+                </div>
+                
+                <div class="bg-light rounded p-3 mb-4 fst-italic text-muted">
+                    "{{ perfil.biografia|default:"¡Hola! Soy un explorador de CultureMap." }}"
+                </div>
+
+                <div class="row g-3 text-center mb-4">
+                    <div class="col-6">
+                        <div class="border rounded p-3 h-100">
+                            <h3 class="text-primary mb-0 fw-bold">{{ perfil.puntos }}</h3>
+                            <small class="text-uppercase text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">Puntos</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3 h-100">
+                            <h3 class="text-success mb-0 fw-bold">{{ perfil.rol|title }}</h3>
+                            <small class="text-uppercase text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">Rol</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <a href="{% url 'index_lugares' %}" class="btn btn-outline-secondary">Volver al mapa</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

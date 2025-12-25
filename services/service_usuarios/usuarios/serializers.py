@@ -19,7 +19,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('password2', None)
-        # create_user ya maneja el hasheado de contraseña y is_active=True por defecto
         return User.objects.create_user(**validated_data, is_active=True)
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -28,16 +27,29 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         token['username'] = user.username
         token['rol'] = user.rol
+        token['id'] = user.id  # Incluimos el ID en el token también por utilidad
         return token
 
     def validate(self, attrs):
         data = super().validate(attrs)
         data['username'] = self.user.username
         data['rol'] = self.user.rol
+        data['id'] = self.user.id
         return data
 
 class UserManagementSerializer(serializers.ModelSerializer):
+    """Serializer completo para administración o perfil propio"""
+    nivel = serializers.ReadOnlyField() # Campo calculado
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'rol', 'is_active', 'date_joined')
-        read_only_fields = ('username', 'email', 'date_joined')
+        fields = ('id', 'username', 'email', 'rol', 'is_active', 'date_joined', 'biografia', 'puntos', 'nivel')
+        read_only_fields = ('username', 'email', 'date_joined', 'puntos', 'nivel')
+
+class PublicProfileSerializer(serializers.ModelSerializer):
+    """Serializer seguro para ver perfiles de OTROS usuarios (sin email ni datos sensibles)"""
+    nivel = serializers.ReadOnlyField()
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'rol', 'biografia', 'puntos', 'nivel', 'date_joined')
