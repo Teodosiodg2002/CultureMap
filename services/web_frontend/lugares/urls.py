@@ -29,4 +29,7 @@ urlpatterns = [
     #RANKING Y PERFILES PÚBLICOS
     path("ranking/", views.ver_ranking, name="ver_ranking"),
     path("perfil/<int:pk>/", views.ver_perfil, name="ver_perfil"),
+    
+    # DASHBOARD - EXPORTAR CSV
+    path('dashboard/exportar/', views.exportar_lugares_csv, name='exportar_lugares'),
 ]

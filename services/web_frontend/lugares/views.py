@@ -1,8 +1,9 @@
 from django.conf import settings
 from django.shortcuts import render, redirect
-from django.http import Http404
+from django.http import Http404, HttpResponse
 import requests
 from .api_client import ApiClient
+import csv
 
 PUNTOS_CREAR_LUGAR = 50
 PUNTOS_CREAR_EVENTO = 30
@@ -237,7 +238,7 @@ def crear_evento(request):
         if response and response.get('id'):
             # ¡PREMIO! Sumamos puntos
             ApiClient.sumar_puntos(user_id, PUNTOS_CREAR_EVENTO, token)
-            return redirect('index_eventos')
+            return redirect('index_lugares')
         else:
             return render(request, 'lugares/crear_evento.html', {'error': 'Error al crear evento'})
 
@@ -358,5 +359,36 @@ def ver_perfil(request, pk):
     if not perfil:
         print("DEBUG PERFIL: Fallo. Redirigiendo a home...")
         return redirect('index_lugares')
-        
-    return render(request, 'lugares/perfil_publico.html', {'perfil': perfil})
+
+def exportar_lugares_csv(request):
+    """Genera un CSV con todos los lugares para descargar."""
+    # 1. Comprobar permisos
+    rol = request.session.get('rol')
+    if rol not in ['admin', 'organizador']:
+        return redirect('index_lugares')
+
+    # 2. Obtener datos del microservicio
+    lugares = ApiClient.get_lugares()
+
+    # 3. Crear respuesta HTTP tipo CSV
+    response = HttpResponse(
+        content_type='text/csv',
+        headers={'Content-Disposition': 'attachment; filename="lugares_culturemap.csv"'},
+    )
+
+    # 4. Escribir el CSV
+    writer = csv.writer(response)
+    writer.writerow(['ID', 'Nombre', 'Categoría', 'Latitud', 'Longitud', 'Descripción'])
+    
+    if lugares:
+        for lugar in lugares:
+            writer.writerow([
+                lugar.get('id'),
+                lugar.get('nombre'),
+                lugar.get('categoria'),
+                lugar.get('lat'),
+                lugar.get('lng'),
+                lugar.get('descripcion')
+            ])
+
+    return response
