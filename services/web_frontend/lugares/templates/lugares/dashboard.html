@@ -8,9 +8,9 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h2 text-primary"><i class="bi bi-speedometer2"></i> Panel de Administración</h1>
         <div class="btn-toolbar mb-2 mb-md-0">
-            <div class="btn-group me-2">
-                <button type="button" class="btn btn-sm btn-outline-secondary">Exportar Datos</button>
-            </div>
+            <a href="{% url 'exportar_lugares' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-file-earmark-spreadsheet-fill"></i> Exportar Lugares CSV
+            </a>
         </div>
     </div>
 

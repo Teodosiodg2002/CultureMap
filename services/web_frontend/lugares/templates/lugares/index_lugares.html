@@ -5,21 +5,47 @@
 {% block content %}
 
 <style>
-  /* Truco CSS: Cambia el color del marcador rotando el tono (Hue) */
+  /* Filtro para convertir el marcador azul en rojo/rosado */
   img.icono-evento {
     filter: hue-rotate(140deg);
+  }
+  
+  /* Estilo para el control de capas personalizado */
+  .filtro-control {
+    background: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    display: inline-block;
   }
 </style>
 
 <div class="container-fluid py-4">
   
-  <div class="row mb-4 align-items-center">
-    <div class="col-md-8">
+  <div class="row mb-3 align-items-center">
+    <div class="col-md-6">
       <h1 class="display-5 fw-bold">Explora Granada</h1>
-      <p class="lead text-muted">
-        <span style="color: #2c82e0">🔵 <b>Lugares</b></span> &nbsp;|&nbsp;
-        <span style="color: #e0462c">🔴 <b>Eventos</b></span>
-      </p>
+      <p class="text-muted">Descubre la cultura a tu alrededor</p>
+    </div>
+    
+    <div class="col-md-6 text-md-end">
+        <div class="filtro-control shadow-sm">
+            <span class="fw-bold me-2"><i class="bi bi-funnel-fill"></i> Filtros:</span>
+            
+            <div class="form-check form-switch form-check-inline">
+                <input class="form-check-input" type="checkbox" id="switchLugares" checked onchange="toggleCapa('lugares')">
+                <label class="form-check-label fw-bold text-primary" for="switchLugares">
+                    🔵 Lugares
+                </label>
+            </div>
+            
+            <div class="form-check form-switch form-check-inline">
+                <input class="form-check-input" type="checkbox" id="switchEventos" checked onchange="toggleCapa('eventos')">
+                <label class="form-check-label fw-bold text-danger" for="switchEventos">
+                    🔴 Eventos
+                </label>
+            </div>
+        </div>
     </div>
   </div>
 
@@ -119,16 +145,21 @@
 
 {% block scripts %}
 <script>
+  // Variables globales para las capas
+  var map;
+  var layerLugares;
+  var layerEventos;
+
   document.addEventListener('DOMContentLoaded', function () {
 
-      // 1. Inicializar mapa
-      var map = L.map('map').setView([37.1773, -3.5986], 13);
+      // 1. Inicializar mapa centrado en Granada
+      map = L.map('map').setView([37.1773, -3.5986], 13);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© OpenStreetMap contributors'
       }).addTo(map);
 
-      // 2. Icono ROJO
+      // 2. Definir Icono Rojo
       var redIcon = new L.Icon({
           iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
           shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
@@ -139,11 +170,14 @@
           className: 'icono-evento'
       });
 
-      // 3. LUGARES (Azul)
+      // 3. Crear LayerGroups (Grupos de capas vacíos al principio)
+      layerLugares = L.layerGroup();
+      layerEventos = L.layerGroup();
+
+      // 4. Rellenar Capa LUGARES
       {% for lugar in lugares %}
           {% if lugar.lat and lugar.lng %}
-              L.marker([{{ lugar.lat }}, {{ lugar.lng }}])
-               .addTo(map)
+              var marker = L.marker([{{ lugar.lat }}, {{ lugar.lng }}])
                .bindPopup(`
                  <div class="text-center">
                     <h6 class="text-primary mb-1">🏛️ <a href="{% url 'detalle_lugar' lugar.id %}" class="text-decoration-none">{{ lugar.nombre|escapejs }}</a></h6>
@@ -151,14 +185,15 @@
                     <small class="text-muted">${"{{ lugar.descripcion|escapejs }}".substring(0, 50)}...</small>
                  </div>
                `);
+              // AÑADIR A LA CAPA, NO AL MAPA DIRECTAMENTE
+              layerLugares.addLayer(marker);
           {% endif %}
       {% endfor %}
 
-      // 4. EVENTOS (Rojo) - CORREGIDO EL ENLACE POPUP
+      // 5. Rellenar Capa EVENTOS
       {% for evento in eventos %}
           {% if evento.lat and evento.lng %}
-              L.marker([{{ evento.lat }}, {{ evento.lng }}], {icon: redIcon})
-               .addTo(map)
+              var marker = L.marker([{{ evento.lat }}, {{ evento.lng }}], {icon: redIcon})
                .bindPopup(`
                  <div class="text-center">
                     <h6 class="text-danger mb-1">📅 <a href="{% url 'detalle_evento' evento.id %}" class="text-decoration-none text-danger">{{ evento.nombre|escapejs }}</a></h6>
@@ -166,8 +201,33 @@
                     <small class="text-muted">${"{{ evento.descripcion|escapejs }}".substring(0, 50)}...</small>
                  </div>
                `);
+              // AÑADIR A LA CAPA
+              layerEventos.addLayer(marker);
           {% endif %}
       {% endfor %}
+
+      // 6. Añadir ambas capas al mapa inicialmente (porque los checkbox están checked)
+      map.addLayer(layerLugares);
+      map.addLayer(layerEventos);
   });
+
+  // 7. Función global para encender/apagar capas
+  function toggleCapa(tipo) {
+      if (tipo === 'lugares') {
+          var checkbox = document.getElementById('switchLugares');
+          if (checkbox.checked) {
+              map.addLayer(layerLugares);
+          } else {
+              map.removeLayer(layerLugares);
+          }
+      } else if (tipo === 'eventos') {
+          var checkbox = document.getElementById('switchEventos');
+          if (checkbox.checked) {
+              map.addLayer(layerEventos);
+          } else {
+              map.removeLayer(layerEventos);
+          }
+      }
+  }
 </script>
 {% endblock %}
