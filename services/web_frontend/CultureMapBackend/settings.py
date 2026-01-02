@@ -191,7 +191,8 @@ LOGGING = {
 
 # --- SEGURIDAD HTTPS Y CSRF ---
 
-# --- SEGURIDAD HTTPS Y CSRF (Versión Robusta Railway) ---
+print("⚠️⚠️⚠️ DEBUG: CARGANDO CONFIGURACIÓN CSRF ACTUALIZADA ⚠️⚠️⚠️")
+print(f"DEBUG: CSRF_TRUSTED_ORIGINS: https://culturemap-app.up.railway.app")
 
 # 1. Confianza en el origen (Sin barra al final, con https)
 CSRF_TRUSTED_ORIGINS = [
