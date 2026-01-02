@@ -194,3 +194,20 @@ LOGGING = {
         },
     }
 }
+
+# --- SEGURIDAD RAILWAY ---
+
+# 1. Lista de confianza (Tu dominio actual + comodín para no fallar nunca más)
+CSRF_TRUSTED_ORIGINS = [
+    "https://cm-usuarios.up.railway.app",
+    "https://*.up.railway.app",
+]
+
+# 2. Configuración Proxy (Vital para que detecte HTTPS)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
+
+# 3. Cookies
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
