@@ -188,3 +188,17 @@ LOGGING = {
         },
     }
 }
+
+# --- SEGURIDAD HTTPS Y CSRF ---
+
+# 1. Confía en el dominio de Railway (CAMBIA ESTO POR TU DOMINIO REAL)
+CSRF_TRUSTED_ORIGINS = [
+    'https://culturemap-app.up.railway.app', 
+]
+
+# 2. Permitir cookies en iframes/seguras (necesario para login en producción)
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+# 3. Detectar que estamos detrás del Proxy de Railway (HTTPS)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
