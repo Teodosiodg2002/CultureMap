@@ -186,3 +186,14 @@ LOGGING = {
         },
     }
 }
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://culturemap-app.up.railway.app",
+    "https://*.up.railway.app",
+]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
