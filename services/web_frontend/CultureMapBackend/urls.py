@@ -12,5 +12,7 @@ urlpatterns = [
     path('accounts/register/', lugares_views.register, name='register'),
     
     path('accounts/logout/', lugares_views.logout_view, name='logout'),
+    
+    path('', include('django_prometheus.urls')),
 
 ]
