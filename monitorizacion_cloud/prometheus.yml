@@ -5,6 +5,8 @@ scrape_configs:
   - job_name: 'culturemap-services'
     metrics_path: '/metrics'
     scheme: https
+    tls_config:
+      insecure_skip_verify: true
     static_configs:
       - targets:
         # PONE AQUÍ TUS DOMINIOS REALES (sin https:// al principio)
