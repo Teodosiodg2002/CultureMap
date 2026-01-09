@@ -12,3 +12,4 @@ scrape_configs:
         - 'cm-lugares.up.railway.app'
         - 'cm-eventos.up.railway.app'
         - 'cm-interacciones.up.railway.app'
+        - 'culturemap-app.up.railway.app'
