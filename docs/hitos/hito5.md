@@ -109,13 +109,78 @@ El despliegue está completamente automatizado siguiendo la metodología **GitOp
 
 ## 5. Pruebas de Prestaciones (Stress Testing)
 
-*(Se completará esta sección tras finalizar la integración del stack Grafana en la nube).*
+Para validar la robustez de la infraestructura desplegada en el IaaS (**Railway**), se ha realizado una prueba de carga utilizando **Locust**. El objetivo ha sido simular un tráfico concurrente realista para verificar que los microservicios escalan y responden adecuadamente sin que el servicio falle.
+
+### Configuración de la Prueba
+
+- **Herramienta**: Locust (framework de pruebas de carga en Python).
+- **Objetivo**: Entorno de producción  
+  https://culturemap-app.up.railway.app
+- **Carga**: 50 usuarios concurrentes (simulados).
+- **Tasa de aparición (Spawn Rate)**: 5 usuarios nuevos por segundo.
+
+### Escenario Simulado (locustfile.py)
+
+Cada usuario virtual ejecuta un ciclo de navegación que recorre los puntos críticos del sistema:
+
+- Carga de la página de inicio (listado de lugares).
+- Consulta del detalle de un lugar  
+  (petición a `service-lugares` + `service-interacciones`).
+- Consulta del detalle de un evento.
+- Visualización del ranking de usuarios y perfil público  
+  (petición a `service-usuarios`).
+
+### Resultados Obtenidos
+
+Como se observa en la captura de la interfaz de Locust, el sistema mantuvo una tasa de peticiones por segundo (**RPS**) estable con un tiempo de respuesta medio aceptable. No se registraron caídas del servidor ni errores críticos durante la prueba de estrés.
+
+![Resultados Locust](../images/Locust.png)
+
+**Figura 5.1**: Panel de control de Locust durante la ejecución de la prueba de carga con 50 usuarios concurrentes.
 
 ---
 
 ## 6. Monitorización y Observabilidad
 
-*(Se completará esta sección tras finalizar la integración del stack Grafana en la nube).*
+Para cumplir con los requisitos de observabilidad en la nube, se ha desplegado un stack completo de monitorización compuesto por **Prometheus**, **Loki** y **Grafana**, ejecutándose en contenedores independientes dentro de Railway.
+
+### 6.1. Arquitectura de Monitorización
+
+- **Recolección de Métricas (Prometheus)**
+ Cada microservicio Django (backend y frontend) ha sido instrumentado mediante `django-prometheus`. Prometheus realiza *scraping* cada 15 segundos a los endpoints `/metrics` de los cinco servicios desplegados.
+
+- **Ingesta de Logs (Loki)**  
+  El sistema de logging de Django se ha configurado para enviar los registros en tiempo real a Loki mediante `python-logging-loki`, centralizando la salida de logs de todos los contenedores.
+
+- **Visualización (Grafana)**  
+  Se ha diseñado un dashboard unificado que conecta con Prometheus y Loki, permitiendo correlacionar métricas y logs en un único panel de control.
+
+### 6.2. Dashboard de Operaciones
+
+El panel de control diseñado permite una interpretación clara del estado del sistema en tiempo real. Se estructura en cuatro niveles de información:
+
+- **Estado de Servicios (Semáforos)**  
+  Indicadores visuales basados en la métrica `up`, que verifican que los cinco contenedores  
+  (Frontend + 4 microservicios) están activos y respondiendo correctamente.
+
+- **Tráfico en Tiempo Real (RPS)**  
+  Gráfica de series temporales basada en `rate()`, que muestra la carga exacta que recibe cada vista de la aplicación.
+
+- **Tasa de Errores (5XX)**  
+  Monitorización de respuestas HTTP 500, permitiendo detectar fallos críticos en el código bajo condiciones de carga.
+
+- **Logs en Vivo (Traza)**  
+  Panel conectado a Loki que muestra las peticiones HTTP y mensajes del sistema en tiempo real, facilitando la depuración durante picos de tráfico.
+
+### Evidencias
+
+![Dashboard Grafana en reposo](../images/DashboardInit.png)
+
+**Figura 6.1**: Dashboard de Grafana en estado de reposo. Los servicios están operativos (verde) con tráfico residual.
+
+![Dashboard Grafana bajo carga](../images/DashboardLocust.png)
+
+**Figura 6.2**: Dashboard durante la prueba de estrés. Se observa el aumento drástico del tráfico en tiempo real y la ingesta masiva de logs, correlacionándose con la ejecución de Locust.
 
 ---
 
