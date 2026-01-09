@@ -151,42 +151,26 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'json': { 
-            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
-            'format': '%(asctime)s %(name)s %(levelname)s %(message)s %(filename)s %(lineno)d',
-        },
-        'simple': { 
-            'format': '[%(asctime)s] %(levelname)s | %(name)s | %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S',
+        'verbose': {
+            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
         },
     },
     'handlers': {
-        'console_simple': { 
-            'level': 'INFO', 
-            'class': 'logging.StreamHandler', 
-            'formatter': 'simple',
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
         },
-        'file_json': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOGS_DIR / 'api.log',
-            'maxBytes': 1024 * 1024 * 5,
-            'backupCount': 2, 
-            'formatter': 'json',
+        'loki': {
+            'class': 'logging_loki.LokiHandler',
+            'url': os.environ.get('LOKI_URL', 'https://loki-culturemap.up.railway.app/loki/api/v1/push'),
+            'tags': {'app': 'culturemap', 'service': 'service-eventos'}, 
+            'version': '1',
         },
     },
-    'loggers': {
-        'django.request': {
-            'handlers': ['console_simple', 'file_json'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        '': {
-            'handlers': ['console_simple', 'file_json'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-    }
+    'root': {
+        'handlers': ['console', 'loki'],
+        'level': 'INFO',
+    },
 }
 
 CSRF_TRUSTED_ORIGINS = [
