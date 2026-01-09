@@ -353,12 +353,16 @@ def ver_ranking(request):
 def ver_perfil(request, pk):
     print(f"DEBUG PERFIL: Buscando perfil ID: {pk}")
     
+    # 1. Obtenemos los datos del usuario/perfil desde la API
     perfil = ApiClient.get_perfil_publico(pk)
     print(f"DEBUG PERFIL: Respuesta recibida: {perfil}")
 
+    # 2. Si no existe o da error, volvemos al inicio
     if not perfil:
         print("DEBUG PERFIL: Fallo. Redirigiendo a home...")
         return redirect('index_lugares')
+
+    return render(request, 'lugares/perfil_publico.html', {'perfil': perfil})
 
 def exportar_lugares_csv(request):
     """Genera un CSV con todos los lugares para descargar."""
